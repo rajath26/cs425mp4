@@ -946,8 +946,9 @@ int receiveKVFunc()
     register int counter;
 
     char recMsg[LONG_BUF_SZ],
-         retMsg[LONG_BUF_SZ], 
-         * lookupValue;
+         retMsg[LONG_BUF_SZ];
+
+    struct value_group *lookupValue;
 
     socklen_t len;
     
@@ -1324,7 +1325,7 @@ int receiveKVFunc()
 		 case LOOKUP_KV:
                      // Lookup on the local key value store
 	             lookupValue = lookup_store_for_key(temp->key);
-                     printToLog(logF, "LOOKUP RETURN STRING", lookupValue);
+                     printToLog(logF, "LOOKUP RETURN STRING", (char*)lookupValue);
         
                      // If an error send an error message to the original
                      // requestor
@@ -1355,9 +1356,9 @@ int receiveKVFunc()
                      // requestor
 		     else
 		     {
-		         sprintf(logMsg, "KV pair %d = %s SUCCESSFUL LOOKUP", temp->key, lookupValue);
+		       //  sprintf(logMsg, "KV pair %d = %s SUCCESSFUL LOOKUP", temp->key, lookupValue);
 			 printToLog(logF, ipAddress, logMsg);
-                         i_rc = create_message_LOOKUP_RESULT(temp->key, lookupValue, retMsg);
+                         i_rc = create_message_LOOKUP_RESULT(temp->key, lookupValue->value, retMsg);
                          if ( ERROR == i_rc )
                          {
                              printToLog(logF, ipAddress, "Error while creating UPDATE_RESULT_SUCCESS_MESSAGE");
