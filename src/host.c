@@ -941,7 +941,10 @@ int receiveKVFunc()
         numOfBytesRec,
         index, 
         numOfBytesSent,
-        peerSocket;
+        peerSocket,
+        friendList[NUM_OF_FRIENDS],
+        numOfAck, 
+        tempAck;
 
     register int counter;
 
@@ -964,6 +967,9 @@ int receiveKVFunc()
          memset(recMsg, '\0', LONG_BUF_SZ);
          memset(retMsg, '\0', LONG_BUF_SZ);
          lookupValue = NULL;
+         for ( counter = 0; counter < NUM_OF_FRIENDS; counter++ )
+             friendList[counter] = -1;
+         numOfAck = 0;
 
          int clientFd;
 
@@ -1107,92 +1113,160 @@ int receiveKVFunc()
 	     {
 
 	         case INSERT_KV:
-		     // Insert the KV pair in to the KV store
+                     
+                     // Choose two friends to replicate this key value
+                     i_rc = chooseFriendsForReplication(friendList);
+                     if ( ERROR == i_rc )
+                     {
+                         printToLog(logF, ipAddress, "Unable to choose friends for replication");
+                         goto INSERT_ERROR;
+                     }
+
+                     // Fill owner and friends' information in temp
+                     temp.owner = my_hash_value;
+                     temp.friend1 = friendList[0];
+                     temp.friend2 = friendList[1];
+		     
+                     // Insert the KV pair in to the KV store
                      i_rc = insert_key_value_into_store(temp);
 		     // If error send an error message to the original
 		     // requestor
 		     if ( ERROR == i_rc )
 		     {
-                          sprintf(logMsg, "There was an ERROR while INSERTING %d = %s KV pair into the local KV store", temp->key, temp->value);
-			  printToLog(logF, ipAddress, logMsg);
-			  i_rc = create_message_ERROR(retMsg);
-			  if ( ERROR == i_rc )
-			  {
-			      printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
-			      continue;
-			  }
-                          i_rc = append_port_ip_to_message(temp->port, temp->IP, retMsg);
-                          if ( ERROR == i_rc )
-                          {
-                              printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
-                              continue;
-                          }
-			  numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
-			  if ( SUCCESS == numOfBytesSent )
-			  {
-                              printToLog(logF, ipAddress, "ZERO BYTES SENT");
-			      continue;
-			  }
+                          INSERT_ERROR:
+                            // If there was an error during local insert then no need to replicate 
+                            // these entries. The FE i.e. the receiveKVFunc thread will send an 
+                            // ERROR message back to the KVClient
+                            sprintf(logMsg, "There was an ERROR while INSERTING %d = %s KV pair into the local KV store. Since the local insert failed it won't be replicated anywhere else. REPLICATION WONT BE DONE", temp->key, temp->value);
+			    printToLog(logF, ipAddress, logMsg);
+			    i_rc = create_message_ERROR(retMsg);
+			    if ( ERROR == i_rc )
+			    {
+			        printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
+			        continue;
+			    }
+                            i_rc = append_port_ip_to_message(temp->port, temp->IP, retMsg);
+                            if ( ERROR == i_rc )
+                            {
+                                printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
+                                continue;
+                            }
+			    numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
+			    if ( SUCCESS == numOfBytesSent )
+			    {
+                                printToLog(logF, ipAddress, "ZERO BYTES SENT");
+			        continue;
+			    }
 		     }
-                     // If successful send a success message to the original 
-                     // requestor
+                     // If successful replicate and then send a success message 
+                     // to the original requestor
 		     else 
 		     {
-                         sprintf(logMsg, "KV pair %d = %s SUCCESSFULLY INSERTED", temp->key, temp->value);
+                         sprintf(logMsg, "KV pair %d = %s SUCCESSFULLY INSERTED into local key value store", temp->key, temp->value);
 			 printToLog(logF, ipAddress, logMsg);
-			 i_rc = create_message_INSERT_RESULT_SUCCESS(temp->key, retMsg);
-			 if ( ERROR == i_rc )
-			 {
-			     printToLog(logF, ipAddress, "Error while creating INSERT_RESULT_SUCCESS_MESSAGE");
-			     continue;
-			 }
-                         i_rc = append_port_ip_to_message(temp->port, temp->IP, retMsg);
-                          if ( ERROR == i_rc )
-                          {
-                              printToLog(logF, ipAddress, "Error while creating INSERT_RESULT_SUCCESS_MESSAGE");
-                              continue;
-                          }
-			 numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
-	                 if ( SUCCESS == numOfBytesSent )
-		         {
-			     printToLog(logF, ipAddress, "ZERO BYTES SENT");
-			     continue;
-			 }
+                         sprintf(logMSg, "Attempting replication of the Key Value");
+                         printToLog(logF, ipAddress, logMsg);
+
+                         // Increment num of acknowledgements by 1 for 
+                         // local successful insert
+                         numOfAck++;
+
+                         // Replicate the key value in the friends chosen
+                         tempAck = replicateKV(temp, friendList);
+                         numOfAck += tempAck;
+                         
+                         // The replicateKV function will increment number of acknowledgements
+                         // internally based on error or success. Hence check if the number
+                         // exceed the set consistency level
+                         if ( numOfAck >= temp.CL )
+                         {
+                             i_rc = create_message_INSERT_RESULT_SUCCESS(temp->key, retMsg);
+			     if ( ERROR == i_rc )
+			     {
+			         printToLog(logF, ipAddress, "Error while creating INSERT_RESULT_SUCCESS_MESSAGE");
+			         continue;
+			     }
+                             i_rc = append_port_ip_to_message(temp->port, temp->IP, retMsg);
+                             if ( ERROR == i_rc )
+                             {
+                                 printToLog(logF, ipAddress, "Error while creating INSERT_RESULT_SUCCESS_MESSAGE");
+                                 continue;
+                             }
+			     numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
+	                     if ( SUCCESS == numOfBytesSent )
+		             {
+			        printToLog(logF, ipAddress, "ZERO BYTES SENT");
+			        continue;
+			     }
+                         } // End of if ( numOfAck >= temp.CL )
+                         // If set consistency level number of acknowledgements are not
+                         // set then send an error message back to the client
+                         else
+                             goto INSERT_ERROR;
 		     }
                  break;
 
                  case INSERT_LEAVE_KV:
+
+                     i_rc = chooseFriendsForReplication(friendList);
+                     if ( ERROR == i_rc )
+                     {
+                         printToLog(logF, ipAddress, "Unable to choose friends for replication");
+                         goto INSERT_LEAVE_KV_ERROR;
+                     }
+
+                     // Fill owner and friends' infromation in temp
+                     temp.owner = my_hash_value;
+                     temp.friend1 = friendList[0];
+                     temp.friend2 = friendList[1];
+ 
                      // Insert the KV pair in to the KV store 
                      i_rc = insert_key_value_into_store(temp);
                      if ( ERROR == i_rc )
                      {
-                          sprintf(logMsg, "There was an ERROR while INSERTING %d = %s KV pair into the local KV store", temp->key, temp->value);
-                          printToLog(logF, ipAddress, logMsg);
-                          i_rc = create_message_ERROR(retMsg);
-                          if ( ERROR == i_rc )
-                          {
-                              printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
-                              continue;
-                          }
-                          i_rc = append_port_ip_to_message(temp->port, temp->IP, retMsg);
-                          if ( ERROR == i_rc )
-                          {
-                              printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
-                              continue;
-                          }
-                          numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
-                          if ( SUCCESS == numOfBytesSent )
-                          {
-                              printToLog(logF, ipAddress, "ZERO BYTES SENT");
-                              continue;
-                          }
+                          INSERT_LEAVE_KV_ERROR:
+                            // If there was an error during local insert then no need for replicating
+                            // these entries. 
+                            sprintf(logMsg, "There was an ERROR while INSERTING %d = %s KV pair into the local KV store", temp->key, temp->value);
+                            printToLog(logF, ipAddress, logMsg);
+                            i_rc = create_message_ERROR(retMsg);
+                            if ( ERROR == i_rc )
+                            {
+                                printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
+                                continue;
+                            }
+                            i_rc = append_port_ip_to_message(temp->port, temp->IP, retMsg);
+                            if ( ERROR == i_rc )
+                            {
+                                printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
+                                continue;
+                            }
+                            numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
+                            if ( SUCCESS == numOfBytesSent )
+                            {
+                                printToLog(logF, ipAddress, "ZERO BYTES SENT");
+                                continue;
+                            }
                      }
-                     // If successful send a success message to the original 
-                     // requestor
+                     // If successful replicate and then send a success message 
+                     // to the original requestor
                      else
                      {
-                         sprintf(logMsg, "KV pair %d = %s SUCCESSFULLY INSERTED", temp->key, temp->value);
+                         sprintf(logMsg, "KV pair %d = %s SUCCESSFULLY INSERTED into local key value store", temp->key, temp->value);
                          printToLog(logF, ipAddress, logMsg);
+                         sprintf(logMSg, "Attempting replication of the Key Value");
+                         printToLog(logF, ipAddress, logMsg);
+
+                         // Increment num of acknowledgements by 1 for
+                         // local successful insert
+                         numOfAck++;
+
+                         // Replicate the key value in the friends chosen
+                         tempAck = replicateKV(temp, friendList);
+                         numOfAck += tempAck;
+
+                         
+
                          i_rc = create_message_INSERT_RESULT_SUCCESS(temp->key, retMsg);
                          if ( ERROR == i_rc )
                          {

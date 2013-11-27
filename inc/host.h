@@ -62,9 +62,14 @@
 #define DELETE_RESULT             7
 #define UPDATE_RESULT             8
 #define INSERT_LEAVE_KV           9
+#define REP_INSERT                10
+#define REP_DELETE                11
+#define REP_UPDATE                12
+#define REP_LOOKUP                13
 #define ERROR_RESULT              99
 #define PRINT_KV                  5
 #define REORDER_CHECK_TIME_PERIOD 25
+#define NUM_OF_FRIENDS            2
 #define LEADER_STRING             "leader"
 #define MEMBER_STRING             "member"
 
@@ -114,6 +119,7 @@ int intialize_local_key_value_store();
 int receiveKVFunc();
 int localKVReorderFunc();
 int printKVStore();
+int replicateKV(struct op_code * op_instance, int * friendListPtr);
 
 /*
  * End 
