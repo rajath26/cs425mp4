@@ -44,10 +44,20 @@ GHashTable* key_value_store;
 pthread_mutex_t key_value_mutex;
 
 
-int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy){
-         funcEntry(logF,NULL,"prepare_system_for_leave");
-       //  int i = choose_host_hb_index(atoi((char*)key));
+int prepare_system_for_leave(gpointer key, gpointer value, gpointer dummy)
+{
+
+         funcEntry(logF, NULL, "prepare_system_for_leave");
+
          int rc = 1;
+         int friend1,
+             index1,
+             friend1Port,
+             friend2,
+             index2,
+             friend2Port;
+         char friend1IP[25];
+         char friend2IP[25];
          char port[20];
          char IP[100];
          char response[4096];
@@ -56,17 +66,38 @@ int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy){
          struct sockaddr_in peer;
          guint m = g_hash_table_size(key_value_store);
          char message[4096];
-         if(m!=0){
+
+         if(m!=0)
+         {
+
                update_host_list();
+                     
+               // Check if this host is the owner of this KV pair
+               if (!iAmOwner(key, value, my_hash_value))
+               {
+                   printToLog(logF, ipAddress, "This is just a replica copy of another guy so ignore");
+                   rc = 1;
+                   goto rtn;
+               }
+
+               // For all the entries that belong too this host:
+               // 1) rehash 
+               // 2) send it to the peer node 
+               // 3) delete the replica of this entry
+
+               // 1) Re-hash the key
                int i = choose_host_hb_index(atoi((char*)key));
+
+               // 2) Send the insert message to the peer node 
                memset(message, '\0', 4096);
-               create_message_INSERT_LEAVE(atoi((char *)key),(char *)value,message);
-               append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,message);
-               strcpy(port,hb_table[i].port);
-               strcpy(IP,hb_table[i].IP);
+               create_message_INSERT_LEAVE(atoi((char *)key), (char *)value, message);
+               append_port_ip_to_message(hb_table[host_no].port, hb_table[host_no].IP, message);
+               strcpy(port, hb_table[i].port);
+               strcpy(IP, hb_table[i].IP);
                sprintf(logMsg, "PEER NODE CHOSEN. IP ADDRESS: %s PORT NO: %s", port, IP);
                printf("\n%s\n", logMsg);
                printToLog(logF, "PEER NODE CHOSEN", logMsg);
+
                sd = socket(AF_INET, SOCK_STREAM, 0);
                if ( -1 == sd )
                {
@@ -77,11 +108,13 @@ int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy){
                     rc = 0;
                     goto rtn;
                }
+
                memset(&peer, 0, sizeof(struct sockaddr_in));
                peer.sin_family = AF_INET;
                peer.sin_port = htons(atoi(port));
                peer.sin_addr.s_addr = inet_addr(IP);
                memset(&(peer.sin_zero), '\0', 8);
+
                i_rc = connect(sd, (struct sockaddr *) &peer, sizeof(peer));
                if ( i_rc != 0 )
                {
@@ -92,6 +125,7 @@ int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy){
                    rc = 0;
                    goto rtn;
                }
+
                int numOfBytesSent = sendTCP(sd, message, sizeof(message));
                if ( 0 == numOfBytesSent )
                {
@@ -99,6 +133,7 @@ int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy){
                    rc = 0;
                    goto rtn;
                }
+
                int numOfBytesRec = recvTCP(sd, response, 4096);
                if ( 0 == numOfBytesRec )
                {
@@ -107,6 +142,24 @@ int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy){
                    goto rtn;
                }
                //delete_key_value_from_store(atoi((char *)key));
+               
+               // 3) DELETE THE REPLICAS of this entry
+               // Get friend1 hash value in the chord
+               friend1 = ((struct value_group *)value)->friend1;
+               // Get the index of friend 1 from the membership protocol
+               index1 = giveIndexForHash(friend1);
+               if ( ERROR == index1 )
+               {
+                   // If index is not returned properly then we will not be able 
+                   // to delete replicas which is still not a hard stop 
+                   printToLog(logF, ipAddress, "Friend1 index cannot be retrieved");
+               }
+
+               friend1Port = atoi(hb_table[index].port);
+               strcpy(friend1IP, hb_table[index].IP);
+
+               
+               
          }
          else  
          {

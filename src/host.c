@@ -2053,24 +2053,35 @@ int printKVStore()
  * (int) Number of successful operation on replicas
  * 
  ****************************************************************/
-int replicateKV(struct op_code ** op_instance, int *friendListPtr)
+int replicateKV(struct op_code * op_instance, int *friendListPtr)
 {
 
     funcEntry(logF, ipAddress, "replicateKV");
 
     int numOfAck = 0,                          // Number of successful ack
         replicaSocket,                         // Socket descriptor
-        port,                                  // Port no
-        i_rc;                                  // Temp RC
+        replicaPort,                           // Port no
+        i_rc,                                  // Temp RC
+        numOfBytesSent,                        // Number of bytes sent
+        numOfBytesRec;                         // Number of bytes received 
 
     register int counter;                      // counter 
 
-    char ipAddrReplica[SMALL_BUF_SZ];          // IP address
+    char ipAddrReplica[SMALL_BUF_SZ],          // IP address
+         replicationMsgToSend[LONG_BUF_SZ],    // Replication message to send
+         response[LONG_BUF_SZ];                // Response
 
     struct sockaddr_in replicaNode;            // Replica Address
 
+    struct op_code *temp;
+
     for ( counter = 0; counter < NUM_OF_FRIENDS; counter++)
     {
+
+         memset(replicationMsgToSend, '\0', LONG_BUF_SZ);
+         memset(ipAddrReplica, '\0', SMALL_BUF_SZ);
+         memset(response, '\0', LONG_BUF_SZ);
+
          replicaSocket = socket(AF_INET, SOCK_STREAM, 0);
          if ( ERROR == replicaSocket )
          {
@@ -2079,30 +2090,181 @@ int replicateKV(struct op_code ** op_instance, int *friendListPtr)
              continue;
          } // End of if ( ERROR == replicaSocket )
 
-         port = atoi(hb_table[*friendListPtr].port);
-         strcpy(ipAddrReplica, hb_table[*friendListPtr].IP);
+         int index = giveIndexForHash(friendListPtr[counter]);
+         if ( ERROR == index )
+         {
+             printToLog(logF, ipAddress, "Unable to get index of friend");
+             continue;
+         }
+
+         replicaPort = atoi(hb_table[index].port);
+         strcpy(ipAddrReplica, hb_table[index].IP);
 
          memset(&replicaNode, 0, sizeof(struct sockaddr_in));
          replicaNode.sin_family = AF_INET;
-         replicaNode.sin_port = htons(port);
+         replicaNode.sin_port = htons(replicaPort);
          replicaNode.sin_addr.s_addr = inet_addr(ipAddrReplica);
          memset(&(replicaNode.sin_zero), '\0', 8);
 
          i_rc = connect(replicaSocket, (struct sockaddr *) &replicaNode, sizeof(replicaNode));
          if ( SUCCESS != i_rc )
          {
-             strcpy(logMsg, "Cannot connect to server");
+             strcpy(logMsg, "Cannot connect to server during replication");
              printToLog(logF, ipAddress, logMsg);
              printf("\n%s\n", logMsgc); 
              continue;
          } 
 
-         
+         // Based on the op code call the respective replication op code create messages 
+         switch ( op_code->opcode )
+         {
+
+             case INSERT_KV: 
+
+                 i_rc = create_message_REP_INSERT(op_instance, replicationMsgToSend);
+                 printToLog(logF, ipAddress, "message returned by create_message_REP_INSERT");
+                 printToLog(logF, ipAddress, replicationMsgToSend);
+                 if ( ERROR == i_rc )
+                 {
+                     printf("\nUnable to create insert replication message\n");
+                     continue;
+                 } 
+             
+             break;
+
+             case DELETE_KV:
+        
+                 i_rc = create_message_REP_DELETE(op_instance, replicationMsgToSend);
+                 printToLog(logF, ipAddress, "message returned by create_message_REP_DELETE");
+                 printToLog(logF, ipAddress, replicationMsgToSend);
+                 if ( ERROR == i_rc )
+                 {
+                     printf("\nUnable to create delete replication message\n");
+                     continue;
+                 }
+
+             break;
+
+             case UPDATE_KV: 
+
+                 i_rc = create_message_REP_UPDATE(op_instance, replicationMsgToSend);
+                 printToLog(logF, ipAddress, "message returned by create_message_REP_UPDATE");
+                 printToLog(logF, ipAddress, replicationMsgToSend);
+                 if ( ERROR == i_rc )
+                 {
+                     printf("\nUnable to create update replication message\n");
+                     continue;
+                 }
+
+             break;
+
+             case LOOKUP_KV:
+     
+                 i_rc = create_message_REP_LOOKUP(op_instance, replicationMsgToSend);
+                 printToLog(logF, ipAddress, "message returned by create_message_REP_LOOKUP");
+                 printToLog(logF, ipAddress, replicationMsgToSend);
+                 if ( ERROR == i_rc )
+                 {
+                     printf("\nUnable to create update replication message\n");
+                     continue;
+                 }
+
+             break;
+
+             default:
+
+                 // We should never ever be here 
+                 sprintf(logMsg, "Invalid KV OP code received so just continue along");
+                 printToLog(logF, ipAddress, logMsg);
+                 continue;
+
+             break;
+
+         } // End of switch ( op_code->opcode )
+
+         // Send the replication message to the peer node
+         numOfBytesSent = sendTCP(replicaSocket, replicationMsgToSend, LONG_BUF_SZ);
+         if ( SUCCESS == numOfBytesSent )
+         {
+             printToLog(logF, ipAddress, "ZERO BYTES SENT"); 
+             continue;
+         }
+
+         // Get the response back from the peer node 
+         numOfBytesRec = recvTCP(replicaSocket, response, LONG_BUF_SZ);
+         if ( SUCCESS == numOfBytesRec )
+         {
+             printToLog(logF, ipAddress, "ZERO BYTES RECEIVED");
+             continue;
+         }
+
+         printToLog(logF, ipAddress, "Response received for replication message");
+         printToLog(logF, ipAddress, repsonse);
+
+         i_rc = extract_message_op(response, &temp);
+         if ( ERROR == i_rc )
+         {
+             sprintf(logMsg, "Unable to extract received message. Return code of extract_message_op = %d", i_rc);
+             printToLog(logF, ipAddress, logMsg); 
+             continue;
+         }
+
+         printToLog(logF, "successfully extracted message", recMsg);
+         sprintf(logMsg, "opcode: %d", temp->opcode);
+         printToLog(logF, ipAddress, logMsg);
+
+         switch( temp->opcode )
+         {
+
+             case INSERT_RESULT:
+                 sprintf(logMsg, "REPLICATION OPERATION ON PEER NODE SUCCESSFUL. PEER NODE PORT: %d PEER IP ADDRESS: %s", replicaPort, ipAddrReplica);
+                 printf("\n%s\n", logMsg);
+                 printToLog(logF, ipAddress, logMsg);
+                 numOfAck++;
+             break;
+ 
+             case DELETE_RESULT:
+                 sprintf(logMsg, "REPLICATION OPERATION ON PEER NODE SUCCESSFUL. PEER NODE PORT: %d PEER IP ADDRESS: %s", replicaPort, ipAddrReplica);
+                 printf("\n%s\n", logMsg);
+                 printToLog(logF, ipAddress, logMsg);
+                 numOfAck++;
+             break;
+
+             case UPDATE_RESULT:
+                 sprintf(logMsg, "REPLICATION OPERATION ON PEER NODE SUCCESSFUL. PEER NODE PORT: %d PEER IP ADDRESS: %s", replicaPort, ipAddrReplica);
+                 printf("\n%s\n", logMsg);
+                 printToLog(logF, ipAddress, logMsg);
+                 numOfAck++
+             break;
+
+             case LOOKUP_RESULT:
+                 sprintf(logMsg, "REPLICATION OPERATION ON PEER NODE SUCCESSFUL. PEER NODE PORT: %d PEER IP ADDRESS: %s", replicaPort, ipAddrReplica);
+                 printf("\n%s\n", logMsg);
+                 printToLog(logF, ipAddress, logMsg);
+                 numOfAck++;
+             break;
+
+             case ERROR_RESULT:
+                 sprintf(logMsg, "REPLICATION OPERATION ON PEER NODE FAILED. PEER NODE PORT: %d PEER IP ADDRESS: %s", replicaPort, ipAddrReplica);
+                 printf("\n%s\n", logMsg);
+                 printToLog(logF, ipAddress, logMsg);
+             break;
+
+             default:
+                 // We should never ever be here 
+                 sprintf(logMsg, "Invalid KV OP code received so just continue along");
+                 printToLog(logF, ipAddress, logMsg);
+                 continue;
+             break;
+
+         } // End of switch( temp->opcode )
          
     } // End of for ( counter = 0; counter < NUM_OF_FRIENDS; counter++)
 
   rtn:
     funcExit(logF, ipAddress, "replicateKV", numOfAck);
+    sprintf(logMsg, "Number of successful replication operations: %d", numOfAck);
+    printToLog(logF, "NUMBER OF SUCCESSFUL REPLICATION OPERATIONS", logMsg);
     return numOfAck;
 
 } // End of replicateKV()
