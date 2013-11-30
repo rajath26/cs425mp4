@@ -62,6 +62,73 @@ int update_host_list()
    funcExit(logF,NULL,"update_host_list",0);
 }
 
+
+int choose_friends(int num, int *ptr)
+{
+   funcEntry(logF,NULL,"choose_friends");
+                                                     // put print to log here
+   member_list = g_array_new(FALSE,FALSE,sizeof(int));// change 1
+
+//   pthread_mutex_lock(&members_mutex);
+   int j = 0;
+   int i = 0;
+   int hash_value = g_str_hash(buffer) % 360;
+   // copy the hash id and index
+   for(i=0;i<MAX_HOSTS;i++){
+            if(hb_table[i].valid && hb_table[i].status){
+                        int val = atoi(hb_table[i].host_id);
+                        g_array_append_val(member_list, val);
+            }
+   }
+   g_array_sort(member_list,(GCompareFunc)my_int_sort_function);
+   
+   int a[member_list->len];
+   for(i=0;i<member_list->len;i++){                 //
+         a[i] = g_array_index(member_list,int,i);
+   }
+
+   if(member_list->len == 0){  // impossible case
+           pthread_mutex_unlock(&members_mutex);
+           return -1;
+   }
+
+   if(member_list->len == 1){  // when only i am alive
+           pthread_mutex_unlock(&members_mutex);
+           return -1;
+    }
+
+   if(member_list->len == 2){  // only one friend possible           
+           if (a[0]==hash_value){
+                   ptr[0]=a[1];    // put the hash value of the friend
+                   ptr[1]=-1;  // error case
+           }
+           else {
+                   ptr[0]=a[0];   // put the hash value of the friend
+                   ptr[1]=-1;   // error case
+           }
+     goto done;
+   }   
+              
+   for(i=0;i<member_list->len;i++){          
+           if(a[i]==hash_value){
+                   ptr[0]=a[(i+1)%(member_list->len)];
+                   ptr[1]=a[(i+2)%(member_list->len)];
+           }
+   }
+
+done:
+
+   for(i=0;i<MAX_HOSTS;i++){
+           if(ptr[0] == atoi(hb_table[i].host_id))
+                  ptr[0] = i;
+             
+           if(ptr[1] == atoi(hb_table[i].host_id))
+                  ptr[1] = i;
+   }
+
+//  pthread_mutex_unlock(&members_mutex);
+
+}
 //still work to do
 
 int choose_host_hb_index(int key)
