@@ -42,7 +42,7 @@
  */
 #define SUCCESS                   0
 #define ERROR                     -1
-#define CLIENT_NUM_OF_CL_ARGS     5 
+#define CLIENT_NUM_OF_CL_ARGS     6 
 #define NUM_OF_THREADS            2
 #define SMALL_BUF_SZ              100
 #define MED_BUF_SZ                1024
@@ -65,6 +65,7 @@ char clientPortNo[SMALL_BUF_SZ];
 char clientIpAddr[SMALL_BUF_SZ];
 char serverPortNo[SMALL_BUF_SZ];
 char KVclientCmd[LONG_BUF_SZ];
+int consistencyLevel;
 char opCode[SMALL_BUF_SZ];
 char key[SMALL_BUF_SZ];
 char value[LONG_BUF_SZ];

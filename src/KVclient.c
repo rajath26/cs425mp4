@@ -40,6 +40,7 @@
  *                            ii) Ip Address of host
  *                            iii) port no of server 
  *                            iv) KV Client Command
+ *                            v) Consistency Level
  * 
  * RETURN:
  * (int) ZERO if success
@@ -56,7 +57,7 @@ int KVClient_CLA_check(int argc, char *argv[])
     if ( argc != CLIENT_NUM_OF_CL_ARGS )
     {
         printf("\nInvalid usage\n");
-        printf("\nUsage information: %s <port_no> <ip_address> <server_port> <KV_client_command>\n", argv[0]);
+        printf("\nUsage information: %s <port_no> <ip_address> <server_port> <KV_client_command> <consistency_level>\n", argv[0]);
         printf("\t\t-> KV Functionalities / OP_CODE\n");
         printf("\t\ti) INSERT\n"); 
         printf("\t\tii) LOOKUP\n");
@@ -590,6 +591,13 @@ int createAndSendOpMsg()
             }
             sprintf(logMsg, "port no: %d ip address %s", atoi(serverPortNo), clientIpAddr);
             printToLog(logF, ipAddress, logMsg);
+            i_rc = append_time_consistency_level(ERROR, consistencyLevel, msgToSend);
+            if ( ERROR == i_rc )
+            {
+                printf("\nUnable to create insert message\n");
+                rc = ERROR;
+                goto rtn;
+            }
             numOfBytesSent = sendTCP(tcp, msgToSend, sizeof(msgToSend));
             if ( SUCCESS == numOfBytesSent )
             {
@@ -610,6 +618,13 @@ int createAndSendOpMsg()
                 goto rtn;
             }
             i_rc = append_port_ip_to_message(clientPortNo, clientIpAddr, msgToSend);
+            if ( ERROR == i_rc )
+            {
+                printf("\nUnable to create lookup message\n");
+                rc = ERROR;
+                goto rtn;
+            }
+            i_rc = append_time_consistency_level(ERROR, consistencyLevel, msgToSend);
             if ( ERROR == i_rc )
             {
                 printf("\nUnable to create lookup message\n");
@@ -642,6 +657,13 @@ int createAndSendOpMsg()
                 rc = ERROR;
                 goto rtn;
             }
+            i_rc = append_time_consistency_level(ERROR, consistencyLevel, msgToSend);
+            if ( ERROR == i_rc )
+            {
+                printf("\nUnable to create update message\n");
+                rc = ERROR;
+                goto rtn;
+            }
             numOfBytesSent = sendTCP(tcp, msgToSend, sizeof(msgToSend));
             if ( SUCCESS == numOfBytesSent )
             {
@@ -662,6 +684,13 @@ int createAndSendOpMsg()
                 goto rtn;
             }
             i_rc = append_port_ip_to_message(clientPortNo, clientIpAddr, msgToSend);
+            if ( ERROR == i_rc )
+            {
+                printf("\nUnable to create delete message\n");
+                rc = ERROR;
+                goto rtn;
+            }
+            i_rc = append_time_consistency_level(ERROR, consistencyLevel, msgToSend);
             if ( ERROR == i_rc )
             {
                 printf("\nUnable to create delete message\n");
@@ -767,6 +796,8 @@ int main(int argc, char *argv[])
     strcpy(serverPortNo, argv[3]);
     memset(KVclientCmd, '\0', LONG_BUF_SZ);
     strcpy(KVclientCmd, argv[4]);
+    consistencyLevel = atoi(argv[5]);
+    printToLog(logF, "CONSISTENCY LEVEL CHOSEN", argv[5]);
 
     strcpy(ipAddress, clientIpAddr);
 
