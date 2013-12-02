@@ -1055,7 +1055,7 @@ int receiveKVFunc()
          // REP_DELETE
          // REP_UPDATE
          // REP_LOOKUP
-         if ( (REP_INSERT == temp->opcode ) || (REP_DELETE == temp->opcode) || (REP_UPDATE == temp->opcode) || (REP_LOOKUP == temp->code) )
+         if ( (REP_INSERT == temp->opcode ) || (REP_DELETE == temp->opcode) || (REP_UPDATE == temp->opcode) || (REP_LOOKUP == temp->opcode) )
              replicationOpCode = 1;
 
          // If the received message is 
@@ -1138,9 +1138,9 @@ int receiveKVFunc()
                      }
 
                      // Fill owner and friends' information in temp
-                     temp.owner = my_hash_value;
-                     temp.friend1 = friendList[0];
-                     temp.friend2 = friendList[1];
+                     temp->owner = my_hash_value;
+                     temp->friend1 = friendList[0];
+                     temp->friend2 = friendList[1];
 		     
                      // Insert the KV pair in to the KV store
                      i_rc = insert_key_value_into_store(temp);
@@ -1185,7 +1185,7 @@ int receiveKVFunc()
 		     {
                          sprintf(logMsg, "KV pair %d = %s SUCCESSFULLY INSERTED into local key value store", temp->key, temp->value);
 			 printToLog(logF, ipAddress, logMsg);
-                         sprintf(logMSg, "Attempting replication of the Key Value");
+                         sprintf(logMsg, "Attempting replication of the Key Value");
                          printToLog(logF, ipAddress, logMsg);
 
                          // Increment num of acknowledgements by 1 for 
@@ -1199,7 +1199,7 @@ int receiveKVFunc()
                          // The replicateKV function will increment number of acknowledgements
                          // internally based on error or success. Hence check if the number
                          // exceed the set consistency level
-                         if ( numOfAck >= temp.CL )
+                         if ( numOfAck >= temp->cons_level )
                          {
                              i_rc = create_message_INSERT_RESULT_SUCCESS(temp->key, retMsg);
 			     if ( ERROR == i_rc )
@@ -1225,7 +1225,7 @@ int receiveKVFunc()
 			        printToLog(logF, ipAddress, "ZERO BYTES SENT");
 			        continue;
 			     }
-                         } // End of if ( numOfAck >= temp.CL )
+                         } // End of if ( numOfAck >= temp->cons_level )
                          // If set consistency level number of acknowledgements are not
                          // set then send an error message back to the client
                          else
@@ -1244,9 +1244,9 @@ int receiveKVFunc()
                      }
 
                      // Fill owner and friends' infromation in temp
-                     temp.owner = my_hash_value;
-                     temp.friend1 = friendList[0];
-                     temp.friend2 = friendList[1];
+                     temp->owner = my_hash_value;
+                     temp->friend1 = friendList[0];
+                     temp->friend2 = friendList[1];
  
                      // Insert the KV pair in to the KV store 
                      i_rc = insert_key_value_into_store(temp);
@@ -1288,7 +1288,7 @@ int receiveKVFunc()
                      {
                          sprintf(logMsg, "KV pair %d = %s SUCCESSFULLY INSERTED into local key value store", temp->key, temp->value);
                          printToLog(logF, ipAddress, logMsg);
-                         sprintf(logMSg, "Attempting replication of the Key Value");
+                         sprintf(logMsg, "Attempting replication of the Key Value");
                          printToLog(logF, ipAddress, logMsg);
 
                          // Increment num of acknowledgements by 1 for
@@ -1302,7 +1302,7 @@ int receiveKVFunc()
                          // The replicateKV function will increment number of acknowledgements
                          // internally based on error or success. Hence check if the number
                          // exceed the set consistency level
-                         if ( numOfAck >= temp.CL )
+                         if ( numOfAck >= temp->cons_level )
                          {
                              i_rc = create_message_INSERT_RESULT_SUCCESS(temp->key, retMsg);
                              if ( ERROR == i_rc )
@@ -1328,7 +1328,7 @@ int receiveKVFunc()
                                  printToLog(logF, ipAddress, "ZERO BYTES SENT");
                                  continue;
                              }
-                         } // End of if ( numOfAck >= temp.CL )
+                         } // End of if ( numOfAck >= temp->cons_level )
                          else 
                              goto INSERT_LEAVE_KV_ERROR;
                      }
@@ -1346,9 +1346,9 @@ int receiveKVFunc()
                      }
 
                       // Fill owner and friends' information in temp
-                     temp.owner = my_hash_value;
-                     temp.friend1 = friendList[0];
-                     temp.friend2 = friendList[1];
+                     temp->owner = my_hash_value;
+                     temp->friend1 = friendList[0];
+                     temp->friend2 = friendList[1];
 
                      // Delete the KV pair in to the KV store
                      i_rc = delete_key_value_from_store(temp->key);
@@ -1392,7 +1392,7 @@ int receiveKVFunc()
 		     {
 		         sprintf(logMsg, "KV pair %d = %s SUCCESSFULLY DELETED from local key value store", temp->key, temp->value);
 			 printToLog(logF, ipAddress, logMsg);
-                         sprintf(logMSg, "Attempting deletion of the replica of the Key Value");
+                         sprintf(logMsg, "Attempting deletion of the replica of the Key Value");
                          printToLog(logF, ipAddress, logMsg);
 
                          // Increment num of acknowledgements by 1 for
@@ -1406,7 +1406,7 @@ int receiveKVFunc()
                          // The replicateKV function will increment number of acknowledgements
                          // internally based on error or success. Hence check if the number
                          // exceed the set consistency level
-                         if ( numOfAck >= temp.CL )
+                         if ( numOfAck >= temp->cons_level )
                          {
 
                              i_rc = create_message_DELETE_RESULT_SUCCESS(temp->key, retMsg);
@@ -1433,7 +1433,7 @@ int receiveKVFunc()
                                  printToLog(logF, ipAddress, "ZERO BYTES SENT");
                                  continue;
                              }
-		         } // End of if ( numOfAck >= temp.CL )
+		         } // End of if ( numOfAck >= temp->cons_level )
                          else
                              goto DELETE_ERROR;
                      } 
@@ -1451,9 +1451,9 @@ int receiveKVFunc()
                      }
 
                      // Fill owner and friends' information in temp
-                     temp.owner = my_hash_value;
-                     temp.friend1 = friendList[0];
-                     temp.friend2 = friendList[1];
+                     temp->owner = my_hash_value;
+                     temp->friend1 = friendList[0];
+                     temp->friend2 = friendList[1];
 
                      // Update KV in to the KV store
 		     i_rc = update_key_value_in_store(temp);
@@ -1509,7 +1509,7 @@ int receiveKVFunc()
                          // The replicateKV function will increment number of acknowledgements
                          // internally based on error or success. Hence check if the number
                          // exceed the set consistency level
-                         if ( numOfAck >= temp.CL )
+                         if ( numOfAck >= temp->cons_level )
                          {
                              i_rc = create_message_UPDATE_RESULT_SUCCESS(temp->key, retMsg);
                              if ( ERROR == i_rc )
@@ -1535,7 +1535,7 @@ int receiveKVFunc()
                                  printToLog(logF, ipAddress, "ZERO BYTES SENT");
                                  continue;
                              }
-		         } // End of if ( numOfAck >= temp.CL )
+		         } // End of if ( numOfAck >= temp->cons_level )
                          else 
                              goto UPDATE_ERROR;
                      }
@@ -1553,9 +1553,9 @@ int receiveKVFunc()
                      }
 
                      // Fill owner and friends' information in temp
-                     temp.owner = my_hash_value;
-                     temp.friend1 = friendList[0];
-                     temp.friend2 = friendList[1];
+                     temp->owner = my_hash_value;
+                     temp->friend1 = friendList[0];
+                     temp->friend2 = friendList[1];
 
                      // Lookup on the local key value store
 	             lookupValue = lookup_store_for_key(temp->key);
@@ -1614,7 +1614,7 @@ int receiveKVFunc()
                          // The replicateKV function will increment number of acknowledgements
                          // internally based on error or success. Hence check if the number
                          // exceed the set consistency level
-                         if ( numOfAck >= temp.CL )
+                         if ( numOfAck >= temp->cons_level )
                          {
                              i_rc = create_message_LOOKUP_RESULT(temp->key, lookupValue->value, retMsg);
                              if ( ERROR == i_rc )
@@ -1640,7 +1640,7 @@ int receiveKVFunc()
                                  printToLog(logF, ipAddress, "ZERO BYTES SENT");
                                  continue;
                              }
-		         } // End of if ( numOfAck >= temp.CL )
+		         } // End of if ( numOfAck >= temp->cons_level )
                          else 
                              goto LOOKUP_ERROR;
                      }
