@@ -147,11 +147,13 @@ int chooseFriendsForReplication(int *ptr)
    }
 
    if(member_list->len == 0){  // impossible case
+           funcExit(logF,NULL,"choose_friends",-1);
            pthread_mutex_unlock(&members_mutex);
            return -1;
    }
 
    if(member_list->len == 1){  // when only i am alive
+           funcExit(logF,NULL,"choose_friends",-1);
            pthread_mutex_unlock(&members_mutex);
            return -1;
     }
@@ -168,6 +170,7 @@ int chooseFriendsForReplication(int *ptr)
      goto done;
    }   
               
+   printToLog(logf,"I am here","yesssssssssss");
    for(i=0;i<member_list->len;i++){          
            if(a[i]==hash_value){
                    ptr[0]=a[(i+1)%(member_list->len)];
@@ -178,6 +181,7 @@ int chooseFriendsForReplication(int *ptr)
 
    done : 
            pthread_mutex_unlock(&members_mutex);
+           funcExit(logF,NULL,"choose_friends",0);
            return 0;
 
 }
