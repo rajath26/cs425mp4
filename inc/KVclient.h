@@ -73,13 +73,20 @@ char msgToSend[LONG_BUF_SZ];
 char ipAddress[SMALL_BUF_SZ];
 char logMsg[LONG_BUF_SZ];
 struct sockaddr_in KVClientAddr;
+
 struct op_code{
              int opcode;
              int key;
              char *value;
              char port[15];
              char IP[40];
+             unsigned int timeStamp;
+             int owner;
+             int friend1;
+             int friend2;
+             int cons_level;
 };
+
 
 /*
  * Function Declarations
@@ -297,7 +304,7 @@ int extract_message_op(char *message, struct op_code** instance){
 
                    char *token2 = strtok(NULL,delim_temp);  // extract the second part
                    char *ip_port = (char *)malloc(strlen(token2));
-                   char ip_port[256];
+                 //  char ip_port[256];
                    strcpy(ip_port,token2);
 
                    char *third_part = strtok(NULL,delim_temp);  // extract the third part

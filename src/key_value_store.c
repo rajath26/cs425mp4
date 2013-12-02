@@ -466,7 +466,7 @@ void process_key_value(gpointer key,gpointer value, gpointer dummy)
     struct op_code *temp = NULL;
     int friendsAlive = 1;
     int friendList[2];
-    struct op_code * temp = (struct op_code *) malloc(sizeof(struct op_code));
+    struct op_code* temp = (struct op_code *) malloc(sizeof(struct op_code));
     int tempAck;
 
     strcpy(port,hb_table[i].port);
