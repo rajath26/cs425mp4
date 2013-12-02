@@ -1961,6 +1961,9 @@ int receiveKVFunc()
          //////////////////
 	 else 
 	 {
+
+             // Store the accepted clientFd in a new socket descriptor
+             int newClientSd = clientFd;
          
              struct sockaddr_in peerNodeAddr;
 
@@ -2022,7 +2025,7 @@ int receiveKVFunc()
              } 
  
              // Send a message back to the local client
-             numOfBytesSent = sendTCP(clientFd, response, LONG_BUF_SZ);
+             numOfBytesSent = sendTCP(newClientSd, response, LONG_BUF_SZ);
              if ( SUCCESS == numOfBytesSent )
              {
                  printToLog(logF, ipAddress, "ZERO BYTES SENT");
