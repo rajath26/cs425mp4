@@ -1309,7 +1309,7 @@ int extract_message_op(char *message, struct op_code** instance){
                    if(strcmp(token,"INSERT_RESULT_SUCCESS")==0){
                             printToLog(logF,"In INSERT_RESULT_SUCCESS","HERE");
                             funcExit(logF,NULL,"extract_message_op",0);
-                            
+                            (*instance)->opcode = 6;
                         //    free(original); 
                         //    free(another_copy);  
                         //    free(token_on); 
@@ -1318,14 +1318,16 @@ int extract_message_op(char *message, struct op_code** instance){
                    }
                    if(strcmp(token,"DELETE_RESULT_SUCCESS")==0){
                             funcExit(logF,NULL,"extract_message_op",0);
+                            (*instance)->opcode = 7;
                         //    free(original); 
                         //    free(another_copy);  
                         //    free(token_on); 
-                        //      free(ip_port);  
+                         //      free(ip_port);  
                             return 7;
                     }
                    if(strcmp(token,"UPDATE_RESULT_SUCCESS")==0){
                             funcExit(logF,NULL,"extract_message_op",0);
+                            (*instance)->opcode = 8;
                        //     free(original); 
                        //     free(another_copy);  
                        //     free(token_on); 
