@@ -1178,7 +1178,7 @@ int extract_message_op(char *message, struct op_code** instance){
                    }
 
 
-                  if(strcmp(token,"INSERT_REP")==0){
+                  if(strcmp(token,"REP_INSERT")==0){
                             (*instance)->opcode = 10; // opcode for INSERT_REP
                             token = strtok(NULL,delim); // get key
                             (*instance)->key = atoi(token);
@@ -1211,7 +1211,7 @@ int extract_message_op(char *message, struct op_code** instance){
                             return 1;
                   }
 
-                  if(strcmp(token,"DELETE_REP")==0){
+                  if(strcmp(token,"REP_DELETE")==0){
                             (*instance)->opcode = 11; // opcode for delete_rep
                             token = strtok(NULL,delim);   // get key
                             (*instance)->key = atoi(token);
@@ -1237,7 +1237,7 @@ int extract_message_op(char *message, struct op_code** instance){
                             return 1;
                   }
  
-                  if(strcmp(token,"LOOKUP_REP")==0){
+                  if(strcmp(token,"REP_LOOKUP")==0){
                             (*instance)->opcode = 13; // opcode for delete_rep
                             token = strtok(NULL,delim);   // get key
                             (*instance)->key = atoi(token);
@@ -1263,7 +1263,7 @@ int extract_message_op(char *message, struct op_code** instance){
                             return 1;
                   }  
 
-                  if(strcmp(token,"UPDATE_REP")==0){
+                  if(strcmp(token,"REP_UPDATE")==0){
 
                             (*instance)->opcode = 12; // opcode for UPDATE_REP
                             token = strtok(NULL,delim); // get key
