@@ -2197,6 +2197,8 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
              continue;
          } // End of if ( ERROR == replicaSocket )
 
+         printToLog(logF, "replicateKV", "SOCKET SUCCESSFUL");
+
          int index = giveIndexForHash(friendListPtr[counter]);
          if ( ERROR == index )
          {
@@ -2204,9 +2206,14 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
              continue;
          }
 
+         printToLog(logF, "replicateKV", "INDEX GOT SUCCESSFULLY");
+
          replicaPort = atoi(hb_table[index].port);
          strcpy(ipAddrReplica, hb_table[index].IP);
 
+         sprintf(logMsg, "Port No of friend chosen: %d; IP Address of friend chosen: %s ", replicaPort, ipAddrReplica);
+         printToLog(logF, "replicateKV", logMsg);
+         
          memset(&replicaNode, 0, sizeof(struct sockaddr_in));
          replicaNode.sin_family = AF_INET;
          replicaNode.sin_port = htons(replicaPort);
@@ -2222,6 +2229,11 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
              continue;
          } 
 
+         printToLog(logF, "replicateKV", "CONNECT SUCCESSFUL");
+
+         sprintf(logMsg, "OP CODE RECEIVED", op_instance->opcode);
+         printToLog(logF, "replicateKV", logMsg);
+
          // Based on the op code call the respective replication op code create messages 
          switch ( op_instance->opcode )
          {
@@ -2229,8 +2241,8 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
              case INSERT_KV: 
 
                  i_rc = create_message_REP_INSERT(op_instance, replicationMsgToSend);
-                 printToLog(logF, ipAddress, "message returned by create_message_REP_INSERT");
-                 printToLog(logF, ipAddress, replicationMsgToSend);
+                 printToLog(logF, "replicateKV", "message returned by create_message_REP_INSERT");
+                 printToLog(logF, "replicateKV", replicationMsgToSend);
                  if ( ERROR == i_rc )
                  {
                      printf("\nUnable to create insert replication message\n");
@@ -2242,12 +2254,14 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
                      printf("\nError while appending port IP to replication message\n");
                      continue;
                  }
+                 printToLog(logF, "replicateKV", replicationMsgToSend);
                  i_rc = append_time_consistency_level(op_instance->timeStamp, SUCCESS, replicationMsgToSend);
                  if ( ERROR == i_rc )
                  {
                      printf("\nUnable to create insert replication message\n");
                      continue;
                  }
+                 printToLog(logF, "replicateKV", replicationMsgToSend);
              
              break;
 
@@ -2267,12 +2281,14 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
                      printf("\nError while appending port IP to replication message\n");
                      continue;
                  }
+                 printToLog(logF, "replicateKV", replicationMsgToSend);
                  i_rc = append_time_consistency_level(op_instance->timeStamp, SUCCESS, replicationMsgToSend);
                  if ( ERROR == i_rc )
                  {
                      printf("\nUnable to create delete replication message\n");
                      continue;
                  }
+                 printToLog(logF, "replicateKV", replicationMsgToSend);
 
              break;
 
@@ -2292,12 +2308,14 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
                      printf("\nError while appending port IP to replication message\n");
                      continue;
                  }
+                 printToLog(logF, "replicateKV", replicationMsgToSend);
                  i_rc = append_time_consistency_level(op_instance->timeStamp, SUCCESS, replicationMsgToSend);
                  if ( ERROR == i_rc )
                  {
                      printf("\nUnable to create update replication message\n");
                      continue;
                  }
+                 printToLog(logF, "replicateKV", replicationMsgToSend);
 
              break;
 
@@ -2317,12 +2335,14 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
                      printf("\nError while appending port IP to replication message\n");
                      continue;
                  }
+                 printToLog(logF, "replicateKV", replicationMsgToSend);
                  i_rc = append_time_consistency_level(op_instance->timeStamp, SUCCESS, replicationMsgToSend);
                  if ( ERROR == i_rc )
                  {
                      printf("\nUnable to create update replication message\n");
                      continue;
                  }
+                 printToLog(logF, "replicateKV", replicationMsgToSend);
 
              break;
 
@@ -2336,6 +2356,8 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
              break;
 
          } // End of switch ( op_code->opcode )
+
+         printToLog(logF, "replicateKV ; Message just before send", replicationMsgToSend);
 
          // Send the replication message to the peer node
          numOfBytesSent = sendTCP(replicaSocket, replicationMsgToSend, LONG_BUF_SZ);
@@ -2353,8 +2375,8 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
              continue;
          }
 
-         printToLog(logF, ipAddress, "Response received for replication message");
-         printToLog(logF, ipAddress, response);
+         printToLog(logF, "replicateKV", "Response received for replication message");
+         printToLog(logF, "replicateKV", response);
 
          i_rc = extract_message_op(response, &temp);
          if ( ERROR == i_rc )
@@ -2366,7 +2388,7 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
 
          printToLog(logF, "successfully extracted message", response);
          sprintf(logMsg, "opcode: %d", temp->opcode);
-         printToLog(logF, ipAddress, logMsg);
+         printToLog(logF, "replicateKV", logMsg);
 
          switch( temp->opcode )
          {
