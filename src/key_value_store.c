@@ -1006,22 +1006,25 @@ struct op_code{
 int extract_message_op(char *message, struct op_code** instance){
 
                    funcEntry(logF,NULL,"extract_message_op");
-	           char *original = (char *)malloc(strlen(message));
+                   char original[512];
+	        //   char *original = (char *)malloc(strlen(message));
                    strcpy(original,message);
 
                    // first extract the first part and then the second (port and the ip)
 
-                   char *another_copy = (char *)malloc(strlen(message));
+               //    char *another_copy = (char *)malloc(strlen(message));
+                   char another_copy[512];
                    strcpy(another_copy,message);
 
                    char delim_temp[5]=";";
                    char *token1 = strtok(another_copy,delim_temp); // extract the first part
-                   char *token_on = (char *)malloc(strlen(token1));
+               //    char *token_on = (char *)malloc(strlen(token1));
+                   char token_on[512];
                    strcpy(token_on,token1);                   
 
                    char *token2 = strtok(NULL,delim_temp);  // extract the second part
-                   char *ip_port = (char *)malloc(strlen(token2));
-                //   char ip_port[256];
+               //    char *ip_port = (char *)malloc(strlen(token2));
+                   char ip_port[256];
                    strcpy(ip_port,token2);
 
                    char *third_part = strtok(NULL,delim_temp);  // extract the third part
@@ -1033,11 +1036,14 @@ int extract_message_op(char *message, struct op_code** instance){
                    int conslevelval = atoi(conslevel);
 
                    char *token3 = strtok(ip_port,":");   //extract port from 2nd part
+                   char port[30];
+		   strcpy(port,token3);
+
                    char *token4 = strtok(NULL,":");     //extract IP from 2nd part
                    char IP[30];                       // store to IP
                    strcpy(IP,token4);
-                   char port[10];                     // store to port
-                   strcpy(port,token3);
+             //      char port[30];                     // store to port
+             //      strcpy(port,token3);
 
                    *instance = (struct op_code *)malloc(sizeof(struct op_code));    
                  
@@ -1063,10 +1069,10 @@ int extract_message_op(char *message, struct op_code** instance){
                             (*instance)->timeStamp = timestampval;
                             (*instance)->cons_level = conslevelval;
                    			    	
-                            free(ip_port);
-                            free(token_on);
-                            free(original);
-                            free(another_copy);          
+                        //    free(ip_port);
+                       //     free(token_on);
+                        //    free(original);
+                        //    free(another_copy);          
 
                             funcExit(logF,NULL,"extract_message_op",0);
                     	    return 1;
@@ -1078,10 +1084,10 @@ int extract_message_op(char *message, struct op_code** instance){
 			    (*instance)->key = atoi(token);
 			    (*instance)->value = NULL;
                             
-                            free(token_on);
-                            free(ip_port);
-                            free(original);
-                            free(another_copy);
+                         //   free(token_on);
+                         //   free(ip_port);
+                         //   free(original);
+                         //   free(another_copy);
                             
                             funcExit(logF,NULL,"extract_message_op",0); 
 			    return 1;
@@ -1097,10 +1103,10 @@ int extract_message_op(char *message, struct op_code** instance){
 			    strcpy(value_instance, token);
 			    (*instance)->value = value_instance;
                             
-                            free(token_on);
-                            free(ip_port);
-                            free(original);
-                            free(another_copy);         
+                      //      free(token_on);
+                      //      free(ip_port);
+                      //      free(original);
+                      //      free(another_copy);         
  
                             funcExit(logF,NULL,"extract_message_op",0);
 			    return 1;
@@ -1111,10 +1117,10 @@ int extract_message_op(char *message, struct op_code** instance){
 			    (*instance)->key = atoi(token);
                             (*instance)->value = NULL;
                             
-		            free(token_on);
-                            free(ip_port);		
-                            free(original);
-                            free(another_copy);                     
+		      //      free(token_on);
+                      //      free(ip_port);		
+                      //      free(original);
+                      //      free(another_copy);                     
        
 		            funcExit(logF,NULL,"extract_message_op",0);		
 			    return 1;
@@ -1130,10 +1136,10 @@ int extract_message_op(char *message, struct op_code** instance){
 			    strcpy(value_instance, token);
 			    (*instance)->value = value_instance;
                             
-                            free(token_on);
-                            free(ip_port);
-                            free(original);
-                            free(another_copy);                             
+                    //        free(token_on);
+                    //        free(ip_port);
+                    //        free(original);
+                    //        free(another_copy);                             
 
  			    funcExit(logF,NULL,"extract_message_op",0);
                             return 1;
@@ -1145,10 +1151,10 @@ int extract_message_op(char *message, struct op_code** instance){
                             strcpy(value_instance,token);
                             (*instance)->value = value_instance;
                             
-                            free(token_on);
-                            free(ip_port);
-                            free(original);
-                            free(another_copy);
+                     //       free(token_on);
+                     //       free(ip_port);
+                     //       free(original);
+                     //       free(another_copy);
 
 			    funcExit(logF,NULL,"extract_message_op",0);	
                             return 1;
@@ -1168,10 +1174,10 @@ int extract_message_op(char *message, struct op_code** instance){
                             (*instance)->timeStamp = timestampval;
                             (*instance)->cons_level = conslevelval;
 
-			    free(token_on);
-                            free(ip_port);	
-                            free(original);
-                            free(another_copy);
+			//    free(token_on);
+                        //    free(ip_port);	
+                        //    free(original);
+                        //    free(another_copy);
 
                             funcExit(logF,NULL,"extract_message_op",0);
                             return 1;
@@ -1202,10 +1208,10 @@ int extract_message_op(char *message, struct op_code** instance){
                             token = strtok(NULL, delim);  // get friend2
                             (*instance)->friend2 = atoi(token);
                             
-                            free(token_on);
-                            free(ip_port);
-                            free(original);
-                            free(another_copy);
+                        //    free(token_on);
+                        //    free(ip_port);
+                        //    free(original);
+                        //    free(another_copy);
 
                             funcExit(logF,NULL,"extract_message_op",0);
                             return 1;
@@ -1228,10 +1234,10 @@ int extract_message_op(char *message, struct op_code** instance){
                             token = strtok(NULL, delim);  // get friend2
                             (*instance)->friend2 = atoi(token);
 
-                            free(token_on);
-                            free(ip_port);
-                            free(original);
-                            free(another_copy);
+                       //     free(token_on);
+                       //     free(ip_port);
+                       //     free(original);
+                       //     free(another_copy);
 
                             funcExit(logF,NULL,"extract_message_op",0);
                             return 1;
@@ -1254,10 +1260,10 @@ int extract_message_op(char *message, struct op_code** instance){
                             token = strtok(NULL, delim);  // get friend2
                             (*instance)->friend2 = atoi(token);
 
-                            free(token_on);
-                            free(ip_port);
-                            free(original);
-                            free(another_copy);
+                       //     free(token_on);
+                       //     free(ip_port);
+                       //     free(original);
+                       //     free(another_copy);
 
                             funcExit(logF,NULL,"extract_message_op",0);
                             return 1;
@@ -1288,19 +1294,42 @@ int extract_message_op(char *message, struct op_code** instance){
                             token = strtok(NULL, delim);  // get friend2
                             (*instance)->friend2 = atoi(token);
 
-                            free(token_on);
-                            free(ip_port);
-                            free(original);
-                            free(another_copy);
+                       //     free(token_on);
+                       //     free(ip_port);
+                       //     free(original);
+                       //     free(another_copy);
 
                             funcExit(logF,NULL,"extract_message_op",0);
                             return 1; 
                   }  
 
                                 
-                   if(strcmp(token,"INSERT_RESULT_SUCCESS")==0){funcExit(logF,NULL,"extract_message_op",0);free(original); free(another_copy);  free(token_on); free(ip_port);  return 6;}
-                   if(strcmp(token,"DELETE_RESULT_SUCCESS")==0){funcExit(logF,NULL,"extract_message_op",0);free(original); free(another_copy);  free(token_on); free(ip_port);  return 7;}
-                   if(strcmp(token,"UPDATE_RESULT_SUCCESS")==0){funcExit(logF,NULL,"extract_message_op",0);free(original); free(another_copy);  free(token_on); free(ip_port);  return 8;}
+                   if(strcmp(token,"INSERT_RESULT_SUCCESS")==0){
+                            printToLog(logF,"In INSERT_RESULT_SUCCESS","HERE");
+                            funcExit(logF,NULL,"extract_message_op",0);
+                            
+                        //    free(original); 
+                        //    free(another_copy);  
+                        //    free(token_on); 
+                        //    free(ip_port);  
+                            return 6;
+                   }
+                   if(strcmp(token,"DELETE_RESULT_SUCCESS")==0){
+                            funcExit(logF,NULL,"extract_message_op",0);
+                        //    free(original); 
+                        //    free(another_copy);  
+                        //    free(token_on); 
+                        //      free(ip_port);  
+                            return 7;
+                    }
+                   if(strcmp(token,"UPDATE_RESULT_SUCCESS")==0){
+                            funcExit(logF,NULL,"extract_message_op",0);
+                       //     free(original); 
+                       //     free(another_copy);  
+                       //     free(token_on); 
+                       //     free(ip_port);  
+                            return 8;
+                   }
     
 }
 			
