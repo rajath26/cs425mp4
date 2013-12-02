@@ -113,7 +113,7 @@ int delete_replica_from_friends(gpointer key, gpointer value)
                
     create_message_DELETE((int *)key, deleteMsg);
     append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,deleteMsg);
-    append_time_consistency_level(1, deleteMsg);
+    append_time_consistency_level(-1, 1, deleteMsg);
  
     numOfBytesSent = sendTCP(friend1Socket, deleteMsg, sizeof(deleteMsg));
     if ( 0 == numOfBytesSent )
@@ -125,7 +125,6 @@ int delete_replica_from_friends(gpointer key, gpointer value)
     }
 
     numOfBytesRec = recvTCP(friend1Socket, deleteResponse, sizeof(deleteResponse));
-
     if ( 0 == numOfBytesRec )
     {
         printToLog(logF, ipAddress, "ZERO BYTES RECEIVED FROM FRIEND1 WHILE DELETING REPLICA DURING LEAVE");
@@ -184,7 +183,7 @@ int delete_replica_from_friends(gpointer key, gpointer value)
 
                create_message_DELETE((int *)key, deleteMsg);
                append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,deleteMsg);
-               append_time_consistency_level(1, deleteMsg);
+               append_time_consistency_level(-1, 1, deleteMsg);
 
                numOfBytesSent = sendTCP(friend2Socket, deleteMsg, sizeof(deleteMsg));
                if ( 0 == numOfBytesSent )
@@ -256,7 +255,7 @@ int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy)
                memset(message, '\0', 4096);
                create_message_INSERT_LEAVE(atoi((char *)key),(char *)value,message);
                append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,message);
-               append_time_consistency_level(1, message);
+               append_time_consistency_level(-1, 1, message);
                strcpy(port,hb_table[i].port);
                strcpy(IP,hb_table[i].IP);
                sprintf(logMsg, "PEER NODE CHOSEN. IP ADDRESS: %s PORT NO: %s", port, IP);
@@ -403,7 +402,7 @@ void process_key_value(gpointer key,gpointer value, gpointer dummy)
     struct op_code *temp = NULL;
     int friendsAlive = 1;
     int friendList[2];
-    struct op_code * temp = NULL;
+    struct op_code * temp = (struct op_code *) malloc(sizeof(struct op_code));
     int tempAck;
 
     strcpy(port,hb_table[i].port);
@@ -485,7 +484,7 @@ void process_key_value(gpointer key,gpointer value, gpointer dummy)
         else
         {
             // 3i) Check if your friends are alive
-            if (!areFriendsAlive(key, value))
+            if (!areFriendsAlive(value))
             {
                 friendsAlive = 0;
             }
@@ -502,14 +501,14 @@ void process_key_value(gpointer key,gpointer value, gpointer dummy)
                 }
 
                 // Fill in information in struct op_code and replicate
-                temp.opcode = 1;
-                temp.key = (char *) key;
-                strcpy(temp.value, (struct value_group *)value.value);
-                strcpy(temp.port, hb_table[host_no].port);
-                strcpy(temp.IP, hb_table[host_no].IP);
-                temp.owner = my_hash_value;
-                temp.friend1 = friendList[0];
-                temp.friend2 = friendList[1]; 
+                temp->opcode = 1;
+                temp->key = atoi((char *)key);
+                strcpy(temp->value, (struct value_group *)value->value);
+                strcpy(temp->port, hb_table[host_no].port);
+                strcpy(temp->IP, hb_table[host_no].IP);
+                temp->owner = my_hash_value;
+                temp->friend1 = friendList[0];
+                temp->friend2 = friendList[1]; 
                 
                 // 3ii) If your friends are not alive then re-replicate
                 tempAck = replicateKV(temp, friendList);
@@ -528,7 +527,7 @@ void process_key_value(gpointer key,gpointer value, gpointer dummy)
     /////
     else
     {
-        if(isOwnerAlive(key, value))
+        if(isOwnerAlive(value))
         {
             printToLog(logF, ipAddress, "Owner of this entry alive. So ignore");
         }
@@ -540,6 +539,7 @@ void process_key_value(gpointer key,gpointer value, gpointer dummy)
             sprintf(logMsg, "PORT: %s, IP : %s , message: %s", hb_table[host_no].port, hb_table[host_no].port, message);
             printToLog(logF, "PROCESS_KEY_VALUE", logMsg);
             append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,message);         
+            append_time_consistency_level(-1, 1, message);
             
             sd = socket(AF_INET, SOCK_STREAM, 0);
             if ( -1 == sd )
