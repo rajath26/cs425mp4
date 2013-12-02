@@ -119,7 +119,7 @@ int intialize_local_key_value_store();
 int receiveKVFunc();
 int localKVReorderFunc();
 int printKVStore();
-int replicateKV(struct op_code * op_instance, int * friendListPtr);
+//int replicateKV(struct op_code * op_instance, int * friendListPtr);
 
 /*
  * End 
