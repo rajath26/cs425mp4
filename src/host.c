@@ -2375,8 +2375,8 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
              continue;
          }
 
-         printToLog(logF, replicateKV, "Response received for replication message");
-         printToLog(logF, replicateKV, response);
+         printToLog(logF, "replicateKV", "Response received for replication message");
+         printToLog(logF, "replicateKV", response);
 
          i_rc = extract_message_op(response, &temp);
          if ( ERROR == i_rc )
@@ -2388,7 +2388,7 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
 
          printToLog(logF, "successfully extracted message", response);
          sprintf(logMsg, "opcode: %d", temp->opcode);
-         printToLog(logF, replicateKV, logMsg);
+         printToLog(logF, "replicateKV", logMsg);
 
          switch( temp->opcode )
          {
