@@ -567,7 +567,7 @@ void process_key_value(gpointer key,gpointer value, gpointer dummy)
                 // Fill in information in struct op_code and replicate
                 temp->opcode = 1;
                 temp->key = atoi((char *)key);
-                strcpy(temp->value, (struct value_group *)value->value);
+                strcpy(temp->value, ((struct value_group *)value)->value);
                 strcpy(temp->port, hb_table[host_no].port);
                 strcpy(temp->IP, hb_table[host_no].IP);
                 temp->owner = my_hash_value;
@@ -755,7 +755,7 @@ int update_key_value_in_store(struct op_code *op_instance)
 {
     funcEntry(logF, NULL, "update_key_value_into_store");
     int rc = 0,i_rc;
-    struct value_group* lookupValue = lookup_store_for_key(op_instance->key);
+    char* lookupValue = lookup_store_for_key(op_instance->key);
     if ( NULL == lookupValue ) {
         rc = -1;
         goto rtn;
