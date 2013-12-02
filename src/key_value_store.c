@@ -463,7 +463,6 @@ void process_key_value(gpointer key,gpointer value, gpointer dummy)
     char recMsg[4096];
     char response[4096];
     struct sockaddr_in peer;
-    struct op_code *temp = NULL;
     int friendsAlive = 1;
     int friendList[2];
     struct op_code * temp = (struct op_code *) malloc(sizeof(struct op_code));
