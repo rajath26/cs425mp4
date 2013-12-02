@@ -457,7 +457,7 @@ void print_key_value(gpointer key,gpointer value, gpointer dummy){
          funcEntry(logF,NULL,"print_key_value");
          pthread_mutex_lock(&key_value_mutex);
          printf("\n\t*******************************\n");
-         printf("\tKEY : %s - VALUE : %s\n",(char *)key,(char *)value);
+         printf("\tKEY : %s - VALUE : %s\n",(char *)key,((struct value_group*)value)->value);
          printf("\n\t*******************************\n");
           
          pthread_mutex_unlock(&key_value_mutex);
