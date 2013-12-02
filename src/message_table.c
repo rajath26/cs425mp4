@@ -31,16 +31,10 @@ pthread_mutex_t members_mutex;
 
 int my_hash_value;
 
-int iAmOwner(int key, gpointer value,int hash_value){
-   struct value_group* value_inst = (struct value_group *)value;
-   if(value_inst->owner == hash_value) return 1;
-   else return 0;
-}
-
 int giveIndexForHash(int hash_value){
    int i;
    for(i=0;i<MAX_HOSTS;i++){
-      if( atoi(hb_entry[i].host_id)==hash_value )
+      if( atoi(hb_table[i].host_id)==hash_value )
         return i;
    }
    return -1;
@@ -77,6 +71,7 @@ int update_host_list()
    funcExit(logF,NULL,"update_host_list",0);
 }
 
+/*
 int areFriendsAlive(gpointer value){
  
      struct value_group* temp = (struct value_group*)value;
@@ -106,11 +101,13 @@ int areFriendsAlive(gpointer value){
            return 1;
      else
            return 0;
-}
+}*/
 
+/*
 int isOwnerAlive(gpointer value){
      struct value_group* temp = (struct value_group *)value;
      int owneralive = 0;
+     int i;
      for (i=0;i<MAX_HOSTS;i++){
              if(atoi(hb_table[i].host_id)==value->owner){
                        if(hb_table[i].status==1 && hb_table[i].valid==1){
@@ -122,7 +119,7 @@ int isOwnerAlive(gpointer value){
        return 1;
     else 
        return 0;
-}
+}*/
     
 
 int chooseFriendsForReplication(int *ptr)

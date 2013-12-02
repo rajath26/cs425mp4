@@ -47,6 +47,68 @@ pthread_mutex_t key_value_mutex;
  * THIS FUNCTION DELETES REPLICAS 
  * FROM FRIENDS
  */
+
+
+int isOwnerAlive(gpointer value){
+     struct value_group* temp = (struct value_group *)value;
+     int owneralive = 0;
+     int i;
+     for (i=0;i<MAX_HOSTS;i++){
+             if(atoi(hb_table[i].host_id)==temp->owner){
+                       if(hb_table[i].status==1 && hb_table[i].valid==1){
+                                   owneralive = 1;
+                       }
+             }
+     }
+    if(owneralive)
+       return 1;
+    else
+       return 0;
+}
+
+
+
+int areFriendsAlive(gpointer value){
+
+     struct value_group* temp = (struct value_group*)value;
+     int friend1 = temp->friend1;
+     int friend2 = temp->friend2;
+     int friend1alive=0;
+     int friend2alive=0;
+     int i;
+     // is first friend alive
+     for (i=0;i<MAX_HOSTS;i++){
+             if(atoi(hb_table[i].host_id)==friend1){
+                       if(hb_table[i].status==1 && hb_table[i].valid==1){
+                                   friend1alive = 1;
+                       }
+             }
+     }
+
+     // is second friend alive  
+     for (i=0;i<MAX_HOSTS;i++){
+             if(atoi(hb_table[i].host_id)==friend2){
+                       if(hb_table[i].status==1 && hb_table[i].valid==1){
+                                   friend2alive = 1;
+                       }
+             }
+     }
+
+     if(friend1alive && friend2alive)
+           return 1;
+     else
+           return 0;
+}
+
+
+int iAmOwner(int key, gpointer value,int hash_value){
+   struct value_group* value_inst = (struct value_group *)value;
+   if(value_inst->owner == hash_value) return 1;
+   else return 0;
+}
+
+
+
 int delete_replica_from_friends(gpointer key, gpointer value)
 {
 
@@ -943,7 +1005,7 @@ int extract_message_op(char *message, struct op_code** instance){
 
                    char *token2 = strtok(NULL,delim_temp);  // extract the second part
                    char *ip_port = (char *)malloc(strlen(token2));
-                   char ip_port[256];
+                //   char ip_port[256];
                    strcpy(ip_port,token2);
 
                    char *third_part = strtok(NULL,delim_temp);  // extract the third part
