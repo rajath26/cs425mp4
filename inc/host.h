@@ -120,6 +120,7 @@ int receiveKVFunc();
 int localKVReorderFunc();
 int printKVStore();
 //int replicateKV(struct op_code * op_instance, int * friendListPtr);
+void * FEfunction(void *);
 
 /*
  * End 
