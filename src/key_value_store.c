@@ -51,6 +51,7 @@ pthread_mutex_t key_value_mutex;
 
 
 int isOwnerAlive(gpointer value){
+     funcEntry(logF,NULL,"isOwnerAlive");
      struct value_group* temp = (struct value_group *)value;
      int owneralive = 0;
      int i;
@@ -61,16 +62,19 @@ int isOwnerAlive(gpointer value){
                        }
              }
      }
-    if(owneralive)
+    if(owneralive){
+       funcExit(logF,NULL,"isOwnerAlive",0);  
        return 1;
+    }
     else
+       funcExit(logF,NULL,"isOwnerAlive",0);
        return 0;
 }
 
 
 
 int areFriendsAlive(gpointer value){
-
+     funcEntry(logF,NULL,"areFriendsAlive");
      struct value_group* temp = (struct value_group*)value;
      int friend1 = temp->friend1;
      int friend2 = temp->friend2;
@@ -95,17 +99,28 @@ int areFriendsAlive(gpointer value){
              }
      }
 
-     if(friend1alive && friend2alive)
+     if(friend1alive && friend2alive){
+           funcExit(logF,NULL,"areFriendsAlive",1);
            return 1;
-     else
+     }
+     else {
+           funcExit(logF,NULL,"areFriendsAlive",0);
            return 0;
+     }
 }
 
 
 int iAmOwner(gpointer value,int hash_value){
+   funcEntry(logF,NULL,"iAmOwner");
    struct value_group* value_inst = (struct value_group *)value;
-   if(value_inst->owner == hash_value) return 1;
-   else return 0;
+   if(value_inst->owner == hash_value) {
+   funcExit(logF,NULL,"iAmOwner",0);
+   return 1;
+   }
+   else{
+   funcExit(logF,NULL,"iAmOwner",0);
+   return 0;
+   }
 }
 
 
