@@ -14,6 +14,7 @@
 #include <sys/time.h>
 #include <signal.h>
 
+#define ERROR -1
 
 struct op_code{
              int opcode;
@@ -101,7 +102,7 @@ int areFriendsAlive(gpointer value){
 }
 
 
-int iAmOwner(int key, gpointer value,int hash_value){
+int iAmOwner(gpointer value,int hash_value){
    struct value_group* value_inst = (struct value_group *)value;
    if(value_inst->owner == hash_value) return 1;
    else return 0;
@@ -128,7 +129,8 @@ int delete_replica_from_friends(gpointer key, gpointer value)
     char friend2IP[25]; 
     char deleteMsg[4096];
     char deleteResponse[4096];
-    
+    struct sockaddr_in friend1Addr;
+    int numOfBytesSent;
     // Get friend1 hash value in the chord
     friend1 = ((struct value_group *)value)->friend1;
     // Get the index of friend 1 from the membership protocol
@@ -149,7 +151,7 @@ int delete_replica_from_friends(gpointer key, gpointer value)
     printToLog(logF, ipAddress, logMsg);
 
     friend1Socket = socket(AF_INET, SOCK_STREAM, 0);
-    if ( ERROR = friend1Socket )
+    if ( ERROR == friend1Socket )
     {
         sprintf(logMsg, "Unable to open socket. Error number: %d", errno);
         printToLog(logF, ipAddress, logMsg);
@@ -186,7 +188,7 @@ int delete_replica_from_friends(gpointer key, gpointer value)
         // This is not a hard stop so continue
     }
 
-    numOfBytesRec = recvTCP(friend1Socket, deleteResponse, sizeof(deleteResponse));
+    int numOfBytesRec = recvTCP(friend1Socket, deleteResponse, sizeof(deleteResponse));
     if ( 0 == numOfBytesRec )
     {
         printToLog(logF, ipAddress, "ZERO BYTES RECEIVED FROM FRIEND1 WHILE DELETING REPLICA DURING LEAVE");
@@ -219,14 +221,14 @@ int delete_replica_from_friends(gpointer key, gpointer value)
                printToLog(logF, ipAddress, logMsg);
 
                friend2Socket = socket(AF_INET, SOCK_STREAM, 0);
-               if ( ERROR = friend2Socket )
+               if ( ERROR == friend2Socket )
                {
                    sprintf(logMsg, "Unable to open socket. Error number: %d", errno);
                    printToLog(logF, ipAddress, logMsg);
                    rc = -1;
                    goto rtn;
                }
-
+               struct sockaddr_in friend2Addr;
                memset(&friend2Addr, 0, sizeof(struct sockaddr_in));
                friend2Addr.sin_family = AF_INET;
                friend2Addr.sin_port = htons(friend2Port);
