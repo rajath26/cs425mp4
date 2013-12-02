@@ -953,7 +953,7 @@ int receiveKVFunc()
     char recMsg[LONG_BUF_SZ],
          retMsg[LONG_BUF_SZ];
 
-    struct value_group *lookupValue;
+    char *lookupValue;
 
     socklen_t len;
     
@@ -1495,7 +1495,7 @@ int receiveKVFunc()
 		     {
                          sprintf(logMsg, "KV pair %d = %s SUCCESSFULLY UPDATED in the local key value store", temp->key, temp->value);
 			 printToLog(logF, ipAddress, logMsg);
-                         sprintf(logMSg, "Attempting update on replica of the Key Value");
+                         sprintf(logMsg, "Attempting update on replica of the Key Value");
                          printToLog(logF, ipAddress, logMsg);
 
                          // Increment num of acknowledgements by 1 for
@@ -1600,7 +1600,7 @@ int receiveKVFunc()
 		     {
 		         sprintf(logMsg, "KV pair %d = %s SUCCESSFUL LOOKUP from the local key value store", temp->key, lookupValue);
 			 printToLog(logF, ipAddress, logMsg);
-                         sprintf(logMSg, "Attempting lookup of replica of the Key Value");
+                         sprintf(logMsg, "Attempting lookup of replica of the Key Value");
                          printToLog(logF, ipAddress, logMsg);
 
                          // Increment num of acknowledgements by 1 for
@@ -1616,7 +1616,7 @@ int receiveKVFunc()
                          // exceed the set consistency level
                          if ( numOfAck >= temp->cons_level )
                          {
-                             i_rc = create_message_LOOKUP_RESULT(temp->key, lookupValue->value, retMsg);
+                             i_rc = create_message_LOOKUP_RESULT(temp->key, lookupValue, retMsg);
                              if ( ERROR == i_rc )
                              {
                                  printToLog(logF, ipAddress, "Error while creating UPDATE_RESULT_SUCCESS_MESSAGE");
@@ -2161,7 +2161,7 @@ int printKVStore()
  * (int) Number of successful operation on replicas
  * 
  ****************************************************************/
-int replicateKV(struct op_code * op_instance, int *friendListPtr)
+int replicateKV(struct op_code * op_instance, int * friendListPtr)
 {
 
     funcEntry(logF, ipAddress, "replicateKV");
