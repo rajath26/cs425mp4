@@ -2111,7 +2111,7 @@ int replicateKV(struct op_code * op_instance, int *friendListPtr)
          {
              strcpy(logMsg, "Cannot connect to server during replication");
              printToLog(logF, ipAddress, logMsg);
-             printf("\n%s\n", logMsgc); 
+             printf("\n%s\n", logMsg); 
              continue;
          } 
 
@@ -2129,6 +2129,12 @@ int replicateKV(struct op_code * op_instance, int *friendListPtr)
                      printf("\nUnable to create insert replication message\n");
                      continue;
                  } 
+                 i_rc = append_port_ip_to_message(op_instance->port, op_instance->IP, replicationMsgToSend);
+                 if ( ERROR == i_rc )
+                 {
+                     printf("\nError while appending port IP to replication message\n"):
+                     continue;
+                 }
              
              break;
 
@@ -2140,6 +2146,12 @@ int replicateKV(struct op_code * op_instance, int *friendListPtr)
                  if ( ERROR == i_rc )
                  {
                      printf("\nUnable to create delete replication message\n");
+                     continue;
+                 }
+                 i_rc = append_port_ip_to_message(op_instance->port, op_instance->IP, replicationMsgToSend);
+                 if ( ERROR == i_rc )
+                 {
+                     printf("\nError while appending port IP to replication message\n"):
                      continue;
                  }
 
@@ -2155,6 +2167,12 @@ int replicateKV(struct op_code * op_instance, int *friendListPtr)
                      printf("\nUnable to create update replication message\n");
                      continue;
                  }
+                 i_rc = append_port_ip_to_message(op_instance->port, op_instance->IP, replicationMsgToSend);
+                 if ( ERROR == i_rc )
+                 {
+                     printf("\nError while appending port IP to replication message\n"):
+                     continue;
+                 }
 
              break;
 
@@ -2166,6 +2184,12 @@ int replicateKV(struct op_code * op_instance, int *friendListPtr)
                  if ( ERROR == i_rc )
                  {
                      printf("\nUnable to create update replication message\n");
+                     continue;
+                 }
+                 i_rc = append_port_ip_to_message(op_instance->port, op_instance->IP, replicationMsgToSend);
+                 if ( ERROR == i_rc )
+                 {
+                     printf("\nError while appending port IP to replication message\n"):
                      continue;
                  }
 

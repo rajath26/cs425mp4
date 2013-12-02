@@ -43,11 +43,185 @@ GHashTable* key_value_store;
 
 pthread_mutex_t key_value_mutex;
 
+/*
+ * THIS FUNCTION DELETES REPLICAS 
+ * FROM FRIENDS
+ */
+int delete_replica_from_friends(gpointer key, gpointer value)
+{
 
-int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy){
+    funcEntry(logF, NULL, "delete_replica_from_friends");
+    
+    int rc = 0;
+    int i_rc;
+    int friend1,
+        index1,
+        friend1Port,
+        friend2,
+        index2,
+        friend2Port,
+        friend1Socket,
+        friend2Socket;
+    char friend1IP[25];
+    char friend2IP[25]; 
+    char deleteMsg[4096];
+    char deleteResponse[4096];
+    
+    // Get friend1 hash value in the chord
+    friend1 = ((struct value_group *)value)->friend1;
+    // Get the index of friend 1 from the membership protocol
+    index1 = giveIndexForHash(friend1);
+    if ( ERROR == index1 )
+    {
+        // If index is not returned properly then we will not be able 
+        // to delete replicas which is still not a hard stop 
+        printToLog(logF, ipAddress, "Friend1 index cannot be retrieved");
+        rc = -1;
+        goto friend2Label;
+    }
+
+    friend1Port = atoi(hb_table[index1].port);
+    strcpy(friend1IP, hb_table[index1].IP);
+
+    sprintf(logMsg, "Friend1 from whom replica will be deleted; friend1 hash in chord: %d; friend1 port: %d; friend1IP: %s", friend1, friend1Port, friend1IP);
+    printToLog(logF, ipAddress, logMsg);
+
+    friend1Socket = socket(AF_INET, SOCK_STREAM, 0);
+    if ( ERROR = friend1Socket )
+    {
+        sprintf(logMsg, "Unable to open socket. Error number: %d", errno);
+        printToLog(logF, ipAddress, logMsg);
+        rc = -1;
+        goto friend2Label;
+    }
+
+    memset(&friend1Addr, 0, sizeof(struct sockaddr_in));
+    friend1Addr.sin_family = AF_INET;
+    friend1Addr.sin_port = htons(friend1Port);
+    friend1Addr.sin_addr.s_addr = inet_addr(friend1IP);
+    memset(&(friend1Addr.sin_zero), '\0', 8);
+
+    i_rc = connect(friend1Socket, (struct sockaddr *) &friend1Socket, sizeof(friend1Socket));
+    if ( SUCCESS != i_rc )
+    {
+        strcpy(logMsg, "Cannot connect to server during deletion of replicas in leaveSystem");
+        printToLog(logF, ipAddress, logMsg);
+        printf("\n%s\n", logMsg); 
+        rc = -1;
+        goto friend2Label;
+    }
+               
+    create_message_DELETE((int *)key, deleteMsg);
+    append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,deleteMsg);
+    append_time_consistency_level(1, deleteMsg);
+ 
+    numOfBytesSent = sendTCP(friend1Socket, deleteMsg, sizeof(deleteMsg));
+    if ( 0 == numOfBytesSent )
+    {
+        printToLog(logF, ipAddress, "ZERO BYTES SENT TO FRIEND1 WHILE DELETING REPLICA DURING LEAVE");
+        rc = -1;
+        goto friend2Label;
+        // This is not a hard stop so continue
+    }
+
+    numOfBytesRec = recvTCP(friend1Socket, deleteResponse, sizeof(deleteResponse));
+
+    if ( 0 == numOfBytesRec )
+    {
+        printToLog(logF, ipAddress, "ZERO BYTES RECEIVED FROM FRIEND1 WHILE DELETING REPLICA DURING LEAVE");
+        rc = -1;
+        goto friend2Label;
+        // This is not a hard stop so continue
+    }
+
+    friend2Label:
+
+               memset(deleteMsg, '\0', 4096);
+               memset(deleteResponse, '\0', 4096);
+               // Get friend2 hash value in the chord
+               friend2 = ((struct value_group *)value)->friend2;
+               // Get the index of friend 1 from the membership protocol
+               index2 = giveIndexForHash(friend2);
+               if ( ERROR == index2 )
+               {
+                   // If index is not returned properly then we will not be able 
+                   // to delete replicas which is still not a hard stop 
+                   printToLog(logF, ipAddress, "Friend2 index cannot be retrieved");
+                   rc = -1;
+                   goto rtn;
+               }
+
+               friend2Port = atoi(hb_table[index2].port);
+               strcpy(friend2IP, hb_table[index2].IP);
+
+               sprintf(logMsg, "Friend2 from whom replica will be deleted; friend2 hash in chord: %d; friend2 port: %d; friend2IP: %s", friend2, friend2Port, friend2IP);
+               printToLog(logF, ipAddress, logMsg);
+
+               friend2Socket = socket(AF_INET, SOCK_STREAM, 0);
+               if ( ERROR = friend2Socket )
+               {
+                   sprintf(logMsg, "Unable to open socket. Error number: %d", errno);
+                   printToLog(logF, ipAddress, logMsg);
+                   rc = -1;
+                   goto rtn;
+               }
+
+               memset(&friend2Addr, 0, sizeof(struct sockaddr_in));
+               friend2Addr.sin_family = AF_INET;
+               friend2Addr.sin_port = htons(friend2Port);
+               friend2Addr.sin_addr.s_addr = inet_addr(friend2IP);
+               memset(&(friend2Addr.sin_zero), '\0', 8);
+
+               i_rc = connect(friend2Socket, (struct sockaddr *) &friend2Socket, sizeof(friend2Socket));
+               if ( SUCCESS != i_rc )
+               {
+                   strcpy(logMsg, "Cannot connect to server during deletion of replicas in leaveSystem");
+                   printToLog(logF, ipAddress, logMsg);
+                   printf("\n%s\n", logMsg); 
+                   rc = -1;
+                   goto rtn;
+               }
+
+               create_message_DELETE((int *)key, deleteMsg);
+               append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,deleteMsg);
+               append_time_consistency_level(1, deleteMsg);
+
+               numOfBytesSent = sendTCP(friend2Socket, deleteMsg, sizeof(deleteMsg));
+               if ( 0 == numOfBytesSent )
+               {
+                   printToLog(logF, ipAddress, "ZERO BYTES SENT TO FRIEND2 WHILE DELETING REPLICA DURING LEAVE");
+                   rc = -1;
+                   goto rtn;
+                   // This is not a hard stop so continue
+               }
+
+               numOfBytesRec = recvTCP(friend2Socket, deleteResponse, sizeof(deleteResponse));
+               if ( 0 == numOfBytesRec )
+               {
+                   printToLog(logF, ipAddress, "ZERO BYTES RECEIVED FROM FRIEND2 WHILE DELETING REPLICA DURING LEAVE");
+                   rc = -1;
+                   goto rtn;
+                   // This is not a hard stop so continue
+               }
+
+  rtn:
+    if ( -1 != friend1Socket )
+             close(friend1Socket);
+    if ( -1 != friend2Socket )
+             close(friend2Socket);
+
+    funcExit(logF, NULL, "delete_replica_from_friends", rc);    
+    return rc;
+    
+}
+
+int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy)
+{
+
          funcEntry(logF,NULL,"prepare_system_for_leave");
-       //  int i = choose_host_hb_index(atoi((char*)key));
+
          int rc = 1;
+         
          char port[20];
          char IP[100];
          char response[4096];
@@ -56,17 +230,39 @@ int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy){
          struct sockaddr_in peer;
          guint m = g_hash_table_size(key_value_store);
          char message[4096];
-         if(m!=0){
+
+         if(m!=0)
+         {
+ 
                update_host_list();
+
+               // Check if this host is the owner of this KV pair
+               if (!iAmOwner(value, my_hash_value))
+               {
+                   printToLog(logF, ipAddress, "This is just a replica copy of another guy so ignore");
+                   rc = 1;
+                   goto rtn;
+               }
+
+               // For all the entries that belong too this host:
+               // 1) rehash 
+               // 2) send it to the peer node 
+               // 3) delete the replica of this entry
+
+               // 1) Re-hash the key
                int i = choose_host_hb_index(atoi((char*)key));
+
+               // 2) Send the insert message to the peer node 
                memset(message, '\0', 4096);
                create_message_INSERT_LEAVE(atoi((char *)key),(char *)value,message);
                append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,message);
+               append_time_consistency_level(1, message);
                strcpy(port,hb_table[i].port);
                strcpy(IP,hb_table[i].IP);
                sprintf(logMsg, "PEER NODE CHOSEN. IP ADDRESS: %s PORT NO: %s", port, IP);
                printf("\n%s\n", logMsg);
                printToLog(logF, "PEER NODE CHOSEN", logMsg);
+
                sd = socket(AF_INET, SOCK_STREAM, 0);
                if ( -1 == sd )
                {
@@ -77,11 +273,13 @@ int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy){
                     rc = 0;
                     goto rtn;
                }
+
                memset(&peer, 0, sizeof(struct sockaddr_in));
                peer.sin_family = AF_INET;
                peer.sin_port = htons(atoi(port));
                peer.sin_addr.s_addr = inet_addr(IP);
                memset(&(peer.sin_zero), '\0', 8);
+
                i_rc = connect(sd, (struct sockaddr *) &peer, sizeof(peer));
                if ( i_rc != 0 )
                {
@@ -92,6 +290,8 @@ int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy){
                    rc = 0;
                    goto rtn;
                }
+
+               printToLog(logF, ipAddress, "Sending INSERT MESSAGE TO PEER NODE BEFORE LEAVING");
                int numOfBytesSent = sendTCP(sd, message, sizeof(message));
                if ( 0 == numOfBytesSent )
                {
@@ -99,6 +299,7 @@ int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy){
                    rc = 0;
                    goto rtn;
                }
+
                int numOfBytesRec = recvTCP(sd, response, 4096);
                if ( 0 == numOfBytesRec )
                {
@@ -106,7 +307,17 @@ int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy){
                    rc = 0;
                    goto rtn;
                }
+
                //delete_key_value_from_store(atoi((char *)key));
+
+               // 3) DELETE THE REPLICAS of this entry
+               i_rc = delete_replica_from_friends(key, value);
+               if ( -1 == i_rc )
+               {
+                   printToLog(logF, ipAddress, "Error during deletion of replicas from friends");
+                   printToLog(logF, ipAddress, "Not a hard stop continue");
+               }
+
          }
          else  
          {
@@ -117,6 +328,7 @@ int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy){
       rtn:
          if ( -1 != sd )
              close(sd);
+         
          funcExit(logF,NULL,"prepare_system_for_leave",rc);
          return rc;
 }
@@ -174,67 +386,134 @@ void print_key_value(gpointer key,gpointer value, gpointer dummy){
          funcExit(logF,NULL,"print_key_value",0);
 }
 
-void process_key_value(gpointer key,gpointer value, gpointer dummy){
-	 funcEntry(logF,NULL,"process_key_value");
-         update_host_list();
-         int i = choose_host_hb_index(atoi((char*)key));         
-         int i_rc;
-         int numOfBytesSent;
-         int sd;
-         char port[20];
-         char IP[100];
-         char message[4096];
-         char recMsg[4096];
-         char response[4096];
-         struct sockaddr_in peer;
-         //struct sockaddr_in address;
-         struct op_code *temp = NULL;
-         strcpy(port,hb_table[i].port);
-         strcpy(IP,hb_table[i].IP);
+void process_key_value(gpointer key,gpointer value, gpointer dummy)
+{
+    funcEntry(logF,NULL,"process_key_value");
+    update_host_list();
+    int i = choose_host_hb_index(atoi((char*)key));         
+    int i_rc;
+    int numOfBytesSent;
+    int sd;
+    char port[20];
+    char IP[100];
+    char message[4096];
+    char recMsg[4096];
+    char response[4096];
+    struct sockaddr_in peer;
+    struct op_code *temp = NULL;
+    int friendsAlive = 1;
+    int friendList[2];
+    struct op_code * temp = NULL;
+
+    strcpy(port,hb_table[i].port);
+    strcpy(IP,hb_table[i].IP);
           
-          guint m = g_hash_table_size(key_value_store);
-          if(m==0)return;
-        
-         // delete_key_value_from_store(atoi((char *)key));
-         if(i!=host_no){
-             memset(message, '\0', 4096);
-             create_message_INSERT(atoi((char *)key),(char *)value,message);
-             sprintf(logMsg, "PORT: %s, IP : %s , message: %s", hb_table[host_no].port, hb_table[host_no].port, message);
-             printToLog(logF, "PROCESS_KEY_VALUE", logMsg);
-             append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,message);         
-             //sendKV:
-               sd = socket(AF_INET, SOCK_STREAM, 0);
-               if ( -1 == sd )
-               {
-                    printf("\nUnable to open socket in prepare_system_for_leave\n");
-                    goto rtn;
-               }
-               memset(&peer, 0, sizeof(struct sockaddr_in));
-               peer.sin_family = AF_INET;
-               peer.sin_port = htons(atoi(port));
-               peer.sin_addr.s_addr = inet_addr(IP);
-               memset(&(peer.sin_zero), '\0', 8);
-               i_rc = connect(sd, (struct sockaddr *) &peer, sizeof(peer));
-               if ( i_rc != 0 )
-               {
-                   printf("\nCant connect to server in prepare_system_for_leave\n");
-                   goto rtn;
-               }
-               int numOfBytesSent = sendTCP(sd, message, sizeof(message));
-               if ( 0 == numOfBytesSent )
-               {
-                   printf("\nZERO BYTES SENT IN prepare_system_for_leave\n");
-                   goto rtn;
-               }
-               int numOfBytesRec = recvTCP(sd, response, 4096);
-               if ( 0 == numOfBytesRec )
-               {
-                   printf("\nZERO BYTES RECEIVED IN prepare_system_for_leave\n");
-                   goto rtn;
-               }
+    // Get the hash table size 
+    // if it is empty return
+    guint m = g_hash_table_size(key_value_store);
+    if(m==0)
+        return;
+ 
+    /////
+    // 1) Check if you are the owner of this entry
+    /////
+    if (iAmOwner(value, my_hash_value))
+    {
+        /////
+        // 2) If you are the owner of the entry and it rehashed to another 
+        // peer node then
+        /////
+        if (i != host_no)
+        {
+
+            // 2i) Send it to rehashed peer node
+            memset(message, '\0', 4096);
+            create_message_INSERT(atoi((char *)key),(char *)value,message);
+            sprintf(logMsg, "PORT: %s, IP : %s , message: %s", hb_table[host_no].port, hb_table[host_no].port, message);
+            printToLog(logF, "PROCESS_KEY_VALUE", logMsg);
+            append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,message);         
+            
+            sd = socket(AF_INET, SOCK_STREAM, 0);
+            if ( -1 == sd )
+            {
+                printf("\nUnable to open socket in prepare_system_for_leave\n");
+                goto rtn;
+            }
+            
+            memset(&peer, 0, sizeof(struct sockaddr_in));
+            peer.sin_family = AF_INET;
+            peer.sin_port = htons(atoi(port));
+            peer.sin_addr.s_addr = inet_addr(IP);
+            memset(&(peer.sin_zero), '\0', 8);
+
+            i_rc = connect(sd, (struct sockaddr *) &peer, sizeof(peer));
+            if ( i_rc != 0 )
+            {
+               printf("\nCant connect to server in prepare_system_for_leave\n");
+               goto rtn;
+            }
+
+            int numOfBytesSent = sendTCP(sd, message, sizeof(message));
+            if ( 0 == numOfBytesSent )
+            {
+               printf("\nZERO BYTES SENT IN prepare_system_for_leave\n");
+               goto rtn;
+            }
+
+            int numOfBytesRec = recvTCP(sd, response, 4096);
+            if ( 0 == numOfBytesRec )
+            {
+               printf("\nZERO BYTES RECEIVED IN prepare_system_for_leave\n");
+               goto rtn;
+            }
+
+            // 2ii) Delete from the KV store
             delete_key_value_from_store(atoi((char *)key));
-           //funcExit(logF,NULL,"process_key_value",0);
-         }
+
+            // 2iii) Delete the replicas
+            i_rc = delete_replica_from_friends(key, value);
+            if ( -1 == i_rc )
+            {
+                printToLog(logF, ipAddress, "Deletion of replicas on friends failed. But this is not a hard stop");
+            }
+         
+        } // End of if (i != host_no)
+        /////
+        // 3) If you are the owner of the entry and it rehashed to another 
+        // peer node then
+        /////
+        else
+        {
+            // 3i) Check if your friends are alive
+            if (!friendsAlive(key, value))
+            {
+                friendsAlive = 0;
+            }
+     
+            // Case 1: If one or both of your friends are not alive
+            if ( friendsAlive = 0 )
+            {
+                // Choose two friends to replicate this key value
+                i_rc = chooseFriendsForReplication(friendList);
+                if ( ERROR == i_rc )
+                {
+                    printToLog(logF, ipAddress, "Unable to choose friends for replication");
+                    goto rtn;
+                }
+
+                // Fill in information in struct op_code and replicate
+                temp.opcode = 
+                temp.key = (char *) key;
+                strcpy(temp.value, (struct value_group *)value.value);
+                
+                temp.owner = my_hash_value;
+                temp.friend1 = friendList[0];
+                temp.friend2 = friendList[1];        
+            }
+            
+        } // End of else of if (i != host_no)
+
+    } // End of if (iAmOwner(value, my_hash_value))
 
        rtn:
         close(sd);
