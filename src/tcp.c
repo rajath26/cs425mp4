@@ -76,7 +76,7 @@ int recvTCP(int sd, char * buffer, int length)
 int sendTCP(int sd, char *buffer, int length)
 {
 
-    funcEntry(logF, ipAddress, "sendUDP");
+    funcEntry(logF, ipAddress, "sendTCP");
 
     int numOfBytesSent;               // Number of bytes sent 
 
