@@ -1046,7 +1046,9 @@ int extract_message_op(char *message, struct op_code** instance){
              //      strcpy(port,token3);
 
                    *instance = (struct op_code *)malloc(sizeof(struct op_code));    
-                 
+               
+                   memset(*instance,0,sizeof(struct op_code));                 
+
                    strcpy((*instance)->port,port);
                    strcpy((*instance)->IP,IP); 
 

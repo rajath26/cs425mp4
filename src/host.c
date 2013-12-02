@@ -1194,6 +1194,9 @@ int receiveKVFunc()
                          // Replicate the key value in the friends chosen
                          tempAck = replicateKV(temp, friendList);
                          numOfAck += tempAck;
+
+                         sprintf(logMsg, "NUMBER OF FINAL ACKS %d", numOfAck);
+                         printToLog(logF, "NUMBER OF FINAL ACKNOWLEDGEMENTS", logMsg);
                          
                          // The replicateKV function will increment number of acknowledgements
                          // internally based on error or success. Hence check if the number
@@ -2439,9 +2442,9 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
     } // End of for ( counter = 0; counter < NUM_OF_FRIENDS; counter++)
 
   rtn:
-    funcExit(logF, ipAddress, "replicateKV", numOfAck);
     sprintf(logMsg, "Number of successful replication operations: %d", numOfAck);
     printToLog(logF, "NUMBER OF SUCCESSFUL REPLICATION OPERATIONS", logMsg);
+    funcExit(logF, ipAddress, "replicateKV", numOfAck);
     return numOfAck;
 
 } // End of replicateKV()
