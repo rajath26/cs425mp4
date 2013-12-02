@@ -404,6 +404,7 @@ void process_key_value(gpointer key,gpointer value, gpointer dummy)
     int friendsAlive = 1;
     int friendList[2];
     struct op_code * temp = NULL;
+    int tempAck;
 
     strcpy(port,hb_table[i].port);
     strcpy(IP,hb_table[i].IP);
@@ -479,19 +480,18 @@ void process_key_value(gpointer key,gpointer value, gpointer dummy)
          
         } // End of if (i != host_no)
         /////
-        // 3) If you are the owner of the entry and it rehashed to another 
-        // peer node then
+        // 3) If you are the owner of the entry and it rehashed to yourself
         /////
         else
         {
             // 3i) Check if your friends are alive
-            if (!friendsAlive(key, value))
+            if (!areFriendsAlive(key, value))
             {
                 friendsAlive = 0;
             }
      
             // Case 1: If one or both of your friends are not alive
-            if ( friendsAlive = 0 )
+            if ( friendsAlive == 0 )
             {
                 // Choose two friends to replicate this key value
                 i_rc = chooseFriendsForReplication(friendList);
@@ -502,22 +502,98 @@ void process_key_value(gpointer key,gpointer value, gpointer dummy)
                 }
 
                 // Fill in information in struct op_code and replicate
-                temp.opcode = 
+                temp.opcode = 1;
                 temp.key = (char *) key;
                 strcpy(temp.value, (struct value_group *)value.value);
-                
+                strcpy(temp.port, hb_table[host_no].port);
+                strcpy(temp.IP, hb_table[host_no].IP);
                 temp.owner = my_hash_value;
                 temp.friend1 = friendList[0];
-                temp.friend2 = friendList[1];        
-            }
+                temp.friend2 = friendList[1]; 
+                
+                // 3ii) If your friends are not alive then re-replicate
+                tempAck = replicateKV(temp, friendList);
+                if (2 != tempAck)
+                {
+                    printToLog(logF, ipAddress, "One or both of my friends had died and I tried to replicate and that also failed :(");
+                    printToLog(logF, ipAddress, "Not a hard stop continue");
+                }       
+            } // End of if ( friendsAlive == 0 )
             
         } // End of else of if (i != host_no)
 
     } // End of if (iAmOwner(value, my_hash_value))
+    /////
+    // 4) If you are not the owner of the entry
+    /////
+    else
+    {
+        if(isOwnerAlive(key, value)
+        {
+            printToLog(logF, ipAddress, "Owner of this entry alive. So ignore");
+        }
+        else
+        {
+            memset(message, '\0', 4096);
+            create_message_INSERT(atoi((char *)key),(char *)value,message);
 
-       rtn:
-        close(sd);
+            sprintf(logMsg, "PORT: %s, IP : %s , message: %s", hb_table[host_no].port, hb_table[host_no].port, message);
+            printToLog(logF, "PROCESS_KEY_VALUE", logMsg);
+            append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,message);         
+            
+            sd = socket(AF_INET, SOCK_STREAM, 0);
+            if ( -1 == sd )
+            {
+                printf("\nUnable to open socket in prepare_system_for_leave\n");
+                goto rtn;
+            }
+            
+            memset(&peer, 0, sizeof(struct sockaddr_in));
+            peer.sin_family = AF_INET;
+            peer.sin_port = htons(atoi(port));
+            peer.sin_addr.s_addr = inet_addr(IP);
+            memset(&(peer.sin_zero), '\0', 8);
+
+            i_rc = connect(sd, (struct sockaddr *) &peer, sizeof(peer));
+            if ( i_rc != 0 )
+            {
+               printf("\nCant connect to server in prepare_system_for_leave\n");
+               goto rtn;
+            }
+
+            int numOfBytesSent = sendTCP(sd, message, sizeof(message));
+            if ( 0 == numOfBytesSent )
+            {
+               printf("\nZERO BYTES SENT IN prepare_system_for_leave\n");
+               goto rtn;
+            }
+
+            int numOfBytesRec = recvTCP(sd, response, 4096);
+            if ( 0 == numOfBytesRec )
+            {
+               printf("\nZERO BYTES RECEIVED IN prepare_system_for_leave\n");
+               goto rtn;
+            }
+
+            // 2ii) Delete from the KV store
+            delete_key_value_from_store(atoi((char *)key));
+
+            // 2iii) Delete the replicas
+            i_rc = delete_replica_from_friends(key, value);
+            if ( -1 == i_rc )
+            {
+                printToLog(logF, ipAddress, "Deletion of replicas on friends failed. But this is not a hard stop");
+
+            } 
+
+        } // End of else of if(isOwnerAlive)
+    } // End of else of if (iAmOwner(value, my_hash_value))
+
+    rtn:
+        if ( -1 != sd )
+            close(sd);
         funcExit(logF,NULL,"process_key_value",0);
+
 }
 void reorganize_key_value_store(){
          funcEntry(logF,NULL,"reorganize_key_value_store");
