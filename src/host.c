@@ -2243,7 +2243,7 @@ int replicateKV(struct op_code * op_instance, int *friendListPtr)
                      printf("\nError while appending port IP to replication message\n"):
                      continue;
                  }
-                 i_rc = append_time_consistency_level(ERROR, SUCCESS, replicationMsgToSend);
+                 i_rc = append_time_consistency_level(op_instance->timestamp, SUCCESS, replicationMsgToSend);
                  if ( ERROR == i_rc )
                  {
                      printf("\nUnable to create insert replication message\n");
@@ -2268,7 +2268,7 @@ int replicateKV(struct op_code * op_instance, int *friendListPtr)
                      printf("\nError while appending port IP to replication message\n"):
                      continue;
                  }
-                 i_rc = append_time_consistency_level(ERROR, SUCCESS, replicationMsgToSend);
+                 i_rc = append_time_consistency_level(op_instance->timestamp, SUCCESS, replicationMsgToSend);
                  if ( ERROR == i_rc )
                  {
                      printf("\nUnable to create delete replication message\n");
@@ -2293,7 +2293,7 @@ int replicateKV(struct op_code * op_instance, int *friendListPtr)
                      printf("\nError while appending port IP to replication message\n"):
                      continue;
                  }
-                 i_rc = append_time_consistency_level(ERROR, SUCCESS, replicationMsgToSend);
+                 i_rc = append_time_consistency_level(op_instance->timestamp, SUCCESS, replicationMsgToSend);
                  if ( ERROR == i_rc )
                  {
                      printf("\nUnable to create update replication message\n");
@@ -2318,7 +2318,7 @@ int replicateKV(struct op_code * op_instance, int *friendListPtr)
                      printf("\nError while appending port IP to replication message\n"):
                      continue;
                  }
-                 i_rc = append_time_consistency_level(ERROR, SUCCESS, replicationMsgToSend);
+                 i_rc = append_time_consistency_level(op_instance->timestamp, SUCCESS, replicationMsgToSend);
                  if ( ERROR == i_rc )
                  {
                      printf("\nUnable to create update replication message\n");

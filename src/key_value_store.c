@@ -113,7 +113,7 @@ int delete_replica_from_friends(gpointer key, gpointer value)
                
     create_message_DELETE((int *)key, deleteMsg);
     append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,deleteMsg);
-    append_time_consistency_level(-1, 1, deleteMsg);
+    append_time_consistency_level(-1, 0, deleteMsg);
  
     numOfBytesSent = sendTCP(friend1Socket, deleteMsg, sizeof(deleteMsg));
     if ( 0 == numOfBytesSent )
@@ -183,7 +183,7 @@ int delete_replica_from_friends(gpointer key, gpointer value)
 
                create_message_DELETE((int *)key, deleteMsg);
                append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,deleteMsg);
-               append_time_consistency_level(-1, 1, deleteMsg);
+               append_time_consistency_level(-1, 0, deleteMsg);
 
                numOfBytesSent = sendTCP(friend2Socket, deleteMsg, sizeof(deleteMsg));
                if ( 0 == numOfBytesSent )
@@ -255,7 +255,7 @@ int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy)
                memset(message, '\0', 4096);
                create_message_INSERT_LEAVE(atoi((char *)key),(char *)value,message);
                append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,message);
-               append_time_consistency_level(-1, 1, message);
+               append_time_consistency_level(-1, 0, message);
                strcpy(port,hb_table[i].port);
                strcpy(IP,hb_table[i].IP);
                sprintf(logMsg, "PEER NODE CHOSEN. IP ADDRESS: %s PORT NO: %s", port, IP);
@@ -432,6 +432,7 @@ void process_key_value(gpointer key,gpointer value, gpointer dummy)
             sprintf(logMsg, "PORT: %s, IP : %s , message: %s", hb_table[host_no].port, hb_table[host_no].port, message);
             printToLog(logF, "PROCESS_KEY_VALUE", logMsg);
             append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,message);         
+            append_time_consistency_level(-1, 0, message);
             
             sd = socket(AF_INET, SOCK_STREAM, 0);
             if ( -1 == sd )
@@ -539,7 +540,7 @@ void process_key_value(gpointer key,gpointer value, gpointer dummy)
             sprintf(logMsg, "PORT: %s, IP : %s , message: %s", hb_table[host_no].port, hb_table[host_no].port, message);
             printToLog(logF, "PROCESS_KEY_VALUE", logMsg);
             append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,message);         
-            append_time_consistency_level(-1, 1, message);
+            append_time_consistency_level(-1, 0, message);
             
             sd = socket(AF_INET, SOCK_STREAM, 0);
             if ( -1 == sd )
