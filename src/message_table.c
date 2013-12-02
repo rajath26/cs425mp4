@@ -170,7 +170,7 @@ int chooseFriendsForReplication(int *ptr)
      goto done;
    }   
               
-   printToLog(logf,"I am here","yesssssssssss");
+   printToLog(logF,"I am here","yesssssssssss");
    for(i=0;i<member_list->len;i++){          
            if(a[i]==hash_value){
                    ptr[0]=a[(i+1)%(member_list->len)];
