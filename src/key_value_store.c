@@ -737,7 +737,7 @@ struct value_group{
      funcExit(logF,NULL,"insert_key_value_into_store",0);
 }
 
-char * lookup_store_for_key(int key){
+char* lookup_store_for_key(int key){
     
      funcEntry(logF,NULL,"lookup_store_for_key");
      pthread_mutex_lock(&key_value_mutex);
