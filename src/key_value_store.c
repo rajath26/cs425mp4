@@ -83,7 +83,7 @@ int delete_replica_from_friends(gpointer key, gpointer value)
     friend1Port = atoi(hb_table[index1].port);
     strcpy(friend1IP, hb_table[index1].IP);
 
-    sprintf(logMsg, "Friend1 from whom replica will be deleted; friend1 hash in chord: %d; friend1 port: %d; friend1IP: %s", friend1, friend1Port, friend1IP);
+    sprintf(logMsg, "Friend1 from whom replica will be deleted; friend1 hash in chord: %d; friend1 port: %d; friend1 IP: %s", friend1, friend1Port, friend1IP);
     printToLog(logF, ipAddress, logMsg);
 
     friend1Socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -101,7 +101,7 @@ int delete_replica_from_friends(gpointer key, gpointer value)
     friend1Addr.sin_addr.s_addr = inet_addr(friend1IP);
     memset(&(friend1Addr.sin_zero), '\0', 8);
 
-    i_rc = connect(friend1Socket, (struct sockaddr *) &friend1Socket, sizeof(friend1Socket));
+    i_rc = connect(friend1Socket, (struct sockaddr *) &friend1Addr, sizeof(friend1Addr));
     if ( SUCCESS != i_rc )
     {
         strcpy(logMsg, "Cannot connect to server during deletion of replicas in leaveSystem");
@@ -154,7 +154,7 @@ int delete_replica_from_friends(gpointer key, gpointer value)
                friend2Port = atoi(hb_table[index2].port);
                strcpy(friend2IP, hb_table[index2].IP);
 
-               sprintf(logMsg, "Friend2 from whom replica will be deleted; friend2 hash in chord: %d; friend2 port: %d; friend2IP: %s", friend2, friend2Port, friend2IP);
+               sprintf(logMsg, "Friend2 from whom replica will be deleted; friend2 hash in chord: %d; friend2 port: %d; friend2 IP: %s", friend2, friend2Port, friend2IP);
                printToLog(logF, ipAddress, logMsg);
 
                friend2Socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -172,7 +172,7 @@ int delete_replica_from_friends(gpointer key, gpointer value)
                friend2Addr.sin_addr.s_addr = inet_addr(friend2IP);
                memset(&(friend2Addr.sin_zero), '\0', 8);
 
-               i_rc = connect(friend2Socket, (struct sockaddr *) &friend2Socket, sizeof(friend2Socket));
+               i_rc = connect(friend2Socket, (struct sockaddr *) &friend2Addr, sizeof(friend2Addr));
                if ( SUCCESS != i_rc )
                {
                    strcpy(logMsg, "Cannot connect to server during deletion of replicas in leaveSystem");
@@ -244,7 +244,7 @@ int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy)
                    goto rtn;
                }
 
-               // For all the entries that belong too this host:
+               // For all the entries that belong to this host:
                // 1) rehash 
                // 2) send it to the peer node 
                // 3) delete the replica of this entry
