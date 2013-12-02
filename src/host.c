@@ -1166,6 +1166,12 @@ int receiveKVFunc()
                                 printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
                                 continue;
                             }
+                            i_rc = append_time_consistency_level(ERROR, SUCCESS, retMsg);
+                            if ( ERROR == i_rc )
+                            {
+                                printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
+                                continue;
+                            }
 			    numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
 			    if ( SUCCESS == numOfBytesSent )
 			    {
@@ -1202,6 +1208,12 @@ int receiveKVFunc()
 			         continue;
 			     }
                              i_rc = append_port_ip_to_message(temp->port, temp->IP, retMsg);
+                             if ( ERROR == i_rc )
+                             {
+                                 printToLog(logF, ipAddress, "Error while creating INSERT_RESULT_SUCCESS_MESSAGE");
+                                 continue;
+                             }
+                             i_rc = append_time_consistency_level(ERROR, SUCCESS, retMsg);
                              if ( ERROR == i_rc )
                              {
                                  printToLog(logF, ipAddress, "Error while creating INSERT_RESULT_SUCCESS_MESSAGE");
@@ -1257,6 +1269,12 @@ int receiveKVFunc()
                                 printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
                                 continue;
                             }
+                            i_rc = append_time_consistency_level(ERROR, SUCCESS, retMsg);
+                            if ( ERROR == i_rc )
+                            {
+                                printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
+                                continue;
+                            }
                             numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
                             if ( SUCCESS == numOfBytesSent )
                             {
@@ -1293,6 +1311,12 @@ int receiveKVFunc()
                                  continue;
                              }
                              i_rc = append_port_ip_to_message(temp->port, temp->IP, retMsg);
+                             if ( ERROR == i_rc )
+                             {
+                                 printToLog(logF, ipAddress, "Error while creating INSERT_RESULT_SUCCESS_MESSAGE");
+                                 continue;
+                             }
+                             i_rc = append_time_consistency_level(ERROR, SUCCESS, retMsg);
                              if ( ERROR == i_rc )
                              {
                                  printToLog(logF, ipAddress, "Error while creating INSERT_RESULT_SUCCESS_MESSAGE");
@@ -1349,6 +1373,12 @@ int receiveKVFunc()
                                printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
                                continue;
                            }
+                           i_rc = append_time_consistency_level(ERROR, SUCCESS, retMsg);
+                           if ( ERROR == i_rc )
+                           {
+                               printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
+                               continue;
+                           }
                            numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
                            if ( SUCCESS == numOfBytesSent )
                            {
@@ -1386,6 +1416,12 @@ int receiveKVFunc()
                                  continue;
                              }
                              i_rc = append_port_ip_to_message(temp->port, temp->IP, retMsg);
+                             if ( ERROR == i_rc )
+                             {
+                                 printToLog(logF, ipAddress, "Error while creating DELETE_RESULT_SUCCESS_MESSAGE");
+                                 continue;
+                             }
+                             i_rc = append_time_consistency_level(ERROR, SUCCESS, retMsg);
                              if ( ERROR == i_rc )
                              {
                                  printToLog(logF, ipAddress, "Error while creating DELETE_RESULT_SUCCESS_MESSAGE");
@@ -1442,6 +1478,12 @@ int receiveKVFunc()
                                printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
                                continue;
                            }
+                           i_rc = append_time_consistency_level(ERROR, SUCCESS, retMsg);
+                           if ( ERROR == i_rc )
+                           {
+                               printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
+                               continue;
+                           }
                            numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
                            if ( SUCCESS == numOfBytesSent )
                            {
@@ -1476,6 +1518,12 @@ int receiveKVFunc()
                                  continue;
                              }
                              i_rc = append_port_ip_to_message(temp->port, temp->IP, retMsg);
+                             if ( ERROR == i_rc )
+                             {
+                                 printToLog(logF, ipAddress, "Error while creating UPDATE_RESULT_SUCCESS_MESSAGE");
+                                 continue;
+                             }
+                             i_rc = append_time_consistency_level(ERROR, SUCCESS, retMsg);
                              if ( ERROR == i_rc )
                              {
                                  printToLog(logF, ipAddress, "Error while creating UPDATE_RESULT_SUCCESS_MESSAGE");
@@ -1533,6 +1581,12 @@ int receiveKVFunc()
                               printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
                               continue;
                           }
+                         i_rc = append_time_consistency_level(ERROR, SUCCESS, retMsg);
+                         if ( ERROR == i_rc )
+                          {
+                              printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
+                              continue;
+                          }
                          numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
                          if ( SUCCESS == numOfBytesSent )
                          {
@@ -1574,6 +1628,12 @@ int receiveKVFunc()
                                  printToLog(logF, ipAddress, "Error while creating UPDATE_RESULT_SUCCESS_MESSAGE");
                                  continue;
                              }
+                             i_rc = append_time_consistency_level(ERROR, SUCCESS, retMsg);
+                             if ( ERROR == i_rc )
+                             {
+                                 printToLog(logF, ipAddress, "Error while creating UPDATE_RESULT_SUCCESS_MESSAGE");
+                                 continue;
+                             }
                              numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
                              if ( SUCCESS == numOfBytesSent )
                              {
@@ -1609,6 +1669,12 @@ int receiveKVFunc()
                              printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
                              continue;
                          }
+                         i_rc = append_time_consistency_level(ERROR, SUCCESS, retMsg);
+                         if ( ERROR == i_rc )
+                         {
+                             printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
+                             continue;
+                         }
                          numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
                          if ( SUCCESS == numOfBytesSent )
                          {
@@ -1629,6 +1695,12 @@ int receiveKVFunc()
                              continue;
                          }
                          i_rc = append_port_ip_to_message(temp->port, temp->IP, retMsg);
+                         if ( ERROR == i_rc )
+                         {
+                             printToLog(logF, ipAddress, "Error while creating INSERT_RESULT_SUCCESS_MESSAGE");
+                             continue;
+                         }
+                         i_rc = append_time_consistency_level(ERROR, SUCCESS, retMsg);
                          if ( ERROR == i_rc )
                          {
                              printToLog(logF, ipAddress, "Error while creating INSERT_RESULT_SUCCESS_MESSAGE");
@@ -1666,6 +1738,12 @@ int receiveKVFunc()
                              printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
                              continue;
                          }
+                         i_rc = append_time_consistency_level(ERROR, SUCCESS, retMsg);
+                         if ( ERROR == i_rc )
+                         {
+                             printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
+                             continue;
+                         }
                          numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
                          if ( SUCCESS == numOfBytesSent )
                          {
@@ -1686,6 +1764,12 @@ int receiveKVFunc()
                              continue;
                          }
                          i_rc = append_port_ip_to_message(temp->port, temp->IP, retMsg);
+                         if ( ERROR == i_rc )
+                         {
+                             printToLog(logF, ipAddress, "Error while creating DELETE_RESULT_SUCCESS_MESSAGE");
+                             continue;
+                         }
+                         i_rc = append_time_consistency_level(ERROR, SUCCESS, retMsg);
                          if ( ERROR == i_rc )
                          {
                              printToLog(logF, ipAddress, "Error while creating DELETE_RESULT_SUCCESS_MESSAGE");
@@ -1723,6 +1807,12 @@ int receiveKVFunc()
                              printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
                              continue;
                          }
+                         i_rc = append_time_consistency_level(ERROR, SUCCESS, retMsg);
+                         if ( ERROR == i_rc )
+                         {
+                             printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
+                             continue;
+                         }
                          numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
                          if ( SUCCESS == numOfBytesSent )
                          {
@@ -1741,6 +1831,12 @@ int receiveKVFunc()
                              continue;
                          }
                          i_rc = append_port_ip_to_message(temp->port, temp->IP, retMsg);
+                         if ( ERROR == i_rc )
+                         {
+                             printToLog(logF, ipAddress, "Error while creating UPDATE_RESULT_SUCCESS_MESSAGE");
+                             continue;
+                         }
+                         i_rc = append_time_consistency_level(ERROR, SUCCESS, retMsg);
                          if ( ERROR == i_rc )
                          {
                              printToLog(logF, ipAddress, "Error while creating UPDATE_RESULT_SUCCESS_MESSAGE");
@@ -1780,6 +1876,12 @@ int receiveKVFunc()
                              printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
                              continue;
                          }
+                         i_rc = append_time_consistency_level(ERROR, SUCCESS, retMsg);
+                         if ( ERROR == i_rc )
+                         {
+                             printToLog(logF, ipAddress, "Error while creating ERROR_MESSAGE");
+                             continue;
+                         }
                          numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
                          if ( SUCCESS == numOfBytesSent )
                          {
@@ -1800,6 +1902,12 @@ int receiveKVFunc()
                              continue;
                          }
                          i_rc = append_port_ip_to_message(temp->port, temp->IP, retMsg);
+                         if ( ERROR == i_rc )
+                         {
+                             printToLog(logF, ipAddress, "Error while creating UPDATE_RESULT_SUCCESS_MESSAGE");
+                             continue;
+                         }
+                         i_rc = append_time_consistency_level(ERROR, SUCCESS, retMsg);
                          if ( ERROR == i_rc )
                          {
                              printToLog(logF, ipAddress, "Error while creating UPDATE_RESULT_SUCCESS_MESSAGE");
@@ -2135,6 +2243,12 @@ int replicateKV(struct op_code * op_instance, int *friendListPtr)
                      printf("\nError while appending port IP to replication message\n"):
                      continue;
                  }
+                 i_rc = append_time_consistency_level(ERROR, SUCCESS, replicationMsgToSend);
+                 if ( ERROR == i_rc )
+                 {
+                     printf("\nUnable to create insert replication message\n");
+                     continue;
+                 }
              
              break;
 
@@ -2152,6 +2266,12 @@ int replicateKV(struct op_code * op_instance, int *friendListPtr)
                  if ( ERROR == i_rc )
                  {
                      printf("\nError while appending port IP to replication message\n"):
+                     continue;
+                 }
+                 i_rc = append_time_consistency_level(ERROR, SUCCESS, replicationMsgToSend);
+                 if ( ERROR == i_rc )
+                 {
+                     printf("\nUnable to create delete replication message\n");
                      continue;
                  }
 
@@ -2173,6 +2293,12 @@ int replicateKV(struct op_code * op_instance, int *friendListPtr)
                      printf("\nError while appending port IP to replication message\n"):
                      continue;
                  }
+                 i_rc = append_time_consistency_level(ERROR, SUCCESS, replicationMsgToSend);
+                 if ( ERROR == i_rc )
+                 {
+                     printf("\nUnable to create update replication message\n");
+                     continue;
+                 }
 
              break;
 
@@ -2190,6 +2316,12 @@ int replicateKV(struct op_code * op_instance, int *friendListPtr)
                  if ( ERROR == i_rc )
                  {
                      printf("\nError while appending port IP to replication message\n"):
+                     continue;
+                 }
+                 i_rc = append_time_consistency_level(ERROR, SUCCESS, replicationMsgToSend);
+                 if ( ERROR == i_rc )
+                 {
+                     printf("\nUnable to create update replication message\n");
                      continue;
                  }
 
