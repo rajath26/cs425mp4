@@ -421,7 +421,7 @@ void process_key_value(gpointer key,gpointer value, gpointer dummy)
     if (iAmOwner(value, my_hash_value))
     {
         /////
-        // 2) If you are the owner of the entry and it rehashed to another 
+        // 2) If you are the owner of the entry and it has rehashed to another 
         // peer node then
         /////
         if (i != host_no)
@@ -528,7 +528,7 @@ void process_key_value(gpointer key,gpointer value, gpointer dummy)
     /////
     else
     {
-        if(isOwnerAlive(key, value)
+        if(isOwnerAlive(key, value))
         {
             printToLog(logF, ipAddress, "Owner of this entry alive. So ignore");
         }
