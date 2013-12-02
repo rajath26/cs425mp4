@@ -965,6 +965,8 @@ int receiveKVFunc()
     for(;;)
     {
 
+         printToLog(logF, "SEE HERE", "Beginning of server");
+
          memset(recMsg, '\0', LONG_BUF_SZ);
          memset(retMsg, '\0', LONG_BUF_SZ);
          lookupValue = NULL;
@@ -2043,7 +2045,10 @@ int receiveKVFunc()
 
 	 } // End of else of if ( hash_index == my_hash_index )
 
+
+         printToLog(logF, "SEE HERE", "clientFd closing before the end of the loop");
          close(clientFd);
+         printToLog(logF, "SEE HERE", "peerSocket closing before the end of the loop");
          close(peerSocket);
 
     } // End of for(;;)
