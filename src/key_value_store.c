@@ -741,6 +741,13 @@ int delete_key_value_from_store(int key){
 int append_time_consistency_level(unsigned int timestamp, int consistency_level, char *message){
                    funcEntry(logF,NULL,"append_time_consistency_level");
                    char buf[20];
+
+                   if(timestamp==-1){
+    			 struct timeval timer;
+                         gettimeofday(&timer,NULL);                    
+                         timestamp = timer.tv_sec;
+                   }                   
+
                    sprintf(buf,"%d",timestamp);
                    strcat(message,buf);
                    strcat(message,":");
