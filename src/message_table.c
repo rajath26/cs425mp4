@@ -53,9 +53,9 @@ int my_int_sort_function (gpointer a, gpointer b)
 int update_host_list()
 {
    funcEntry(logF,NULL,"update_host_list");
-                                                     // put print to log here
+   pthread_mutex_lock(&members_mutex);                                                  // put print to log here
    member_list = g_array_new(FALSE,FALSE,sizeof(int));// change 1
-   pthread_mutex_lock(&members_mutex);
+ //   pthread_mutex_lock(&members_mutex);
    int j = 0;
    int i = 0;
    // copy the hash id and index
@@ -67,7 +67,6 @@ int update_host_list()
    }             
    g_array_sort(member_list,(GCompareFunc)my_int_sort_function);
    pthread_mutex_unlock(&members_mutex);
-
    funcExit(logF,NULL,"update_host_list",0);
 }
 
@@ -125,7 +124,8 @@ int isOwnerAlive(gpointer value){
 int chooseFriendsForReplication(int *ptr)
 {
    funcEntry(logF,NULL,"choose_friends");
-                                                     // put print to log here
+         
+   pthread_mutex_lock(&members_mutex);                                            // put print to log here
    member_list = g_array_new(FALSE,FALSE,sizeof(int));// change 1
 
 //   pthread_mutex_lock(&members_mutex);
@@ -176,9 +176,9 @@ int chooseFriendsForReplication(int *ptr)
            }
    }
 
-   done : return 0;
-     
-//  pthread_mutex_unlock(&members_mutex);
+   done : 
+           pthread_mutex_unlock(&members_mutex);
+           return 0;
 
 }
 //still work to do
@@ -192,8 +192,19 @@ int choose_host_hb_index(int key)
     char buffer[20];
     sprintf(buffer,"%d",key);
     int hash_value = g_str_hash(buffer) % 360;
+ //   int a[member_list->len];
+    pthread_mutex_lock(&members_mutex); 
+    member_list = g_array_new(FALSE,FALSE,sizeof(int));
+    for(i=0;i<MAX_HOSTS;i++){
+            if(hb_table[i].valid && hb_table[i].status){
+                        int val = atoi(hb_table[i].host_id);
+                        g_array_append_val(member_list, val);
+            }
+   }
+   g_array_sort(member_list,(GCompareFunc)my_int_sort_function);
+
     int a[member_list->len];
-   
+
     for(i=0;i<member_list->len;i++){
          a[i] = g_array_index(member_list,int,i);
     }
@@ -201,6 +212,7 @@ int choose_host_hb_index(int key)
      
     // impossible case, expect atleast one element to be present
     if( member_list->len == 0){
+           pthread_mutex_unlock(&members_mutex); 
            return -1;
     }
     // if only one member is present
@@ -248,11 +260,12 @@ int choose_host_hb_index(int key)
        if(hb_table[i].valid && hb_table[i].status){
           if(atoi(hb_table[i].host_id)==result){
                     funcExit(logF,NULL,"choose_host_hb_index",i);
+                    pthread_mutex_unlock(&members_mutex); 
                     return i;
           }
        }
    }             
-
+  pthread_mutex_unlock(&members_mutex); 
 }
 /*
  *  This function is used for deleting an entry in the table
