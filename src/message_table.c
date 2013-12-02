@@ -31,6 +31,21 @@ pthread_mutex_t members_mutex;
 
 int my_hash_value;
 
+int iAmOwner(int key, gpointer value,int hash_value){
+   struct value_group* value_inst = (struct value_group *)value;
+   if(value_inst->owner == hash_value) return 1;
+   else return 0;
+}
+
+int giveIndexForHash(int hash_value){
+   int i;
+   for(i=0;i<MAX_HOSTS;i++){
+      if( atoi(hb_entry[i].host_id)==hash_value )
+        return i;
+   }
+   return -1;
+}   
+
 
 int my_int_sort_function (gpointer a, gpointer b)
 {
@@ -62,8 +77,55 @@ int update_host_list()
    funcExit(logF,NULL,"update_host_list",0);
 }
 
+int areFriendsAlive(gpointer value){
+ 
+     struct value_group* temp = (struct value_group*)value;
+     int friend1 = temp->friend1;
+     int friend2 = temp->friend2;
+     int friend1alive=0;
+     int friend2alive=0;
+     // is first friend alive
+     for (i=0;i<MAX_HOSTS;i++){
+             if(atoi(hb_table[i].host_id)==friend1){
+                       if(hb_table[i].status==1 && hb_table[i].valid==1){
+                                   friend1alive = 1;
+                       }
+             }
+     }
 
-int choose_friends(int num, int *ptr)
+     // is second friend alive  
+     for (i=0;i<MAX_HOSTS;i++){
+             if(atoi(hb_table[i].host_id)==friend2){
+                       if(hb_table[i].status==1 && hb_table[i].valid==1){
+                                   friend2alive = 1;
+                       }
+             }
+     }
+
+     if(friend1alive && friend2alive)
+           return 1;
+     else
+           return 0;
+}
+
+int isOwnerAlive(gpointer value){
+     struct value_group* temp = (struct value_group *)value;
+     int owneralive = 0;
+     for (i=0;i<MAX_HOSTS;i++){
+             if(atoi(hb_table[i].host_id)==value->owner){
+                       if(hb_table[i].status==1 && hb_table[i].valid==1){
+                                   owneralive = 1;
+                       }
+             }
+     }
+    if(owneralive)
+       return 1;
+    else 
+       return 0;
+}
+    
+
+int chooseFriendsForReplication(int *ptr)
 {
    funcEntry(logF,NULL,"choose_friends");
                                                      // put print to log here
@@ -72,7 +134,7 @@ int choose_friends(int num, int *ptr)
 //   pthread_mutex_lock(&members_mutex);
    int j = 0;
    int i = 0;
-   int hash_value = g_str_hash(buffer) % 360;
+   int hash_value = my_hash_value;
    // copy the hash id and index
    for(i=0;i<MAX_HOSTS;i++){
             if(hb_table[i].valid && hb_table[i].status){
@@ -113,19 +175,12 @@ int choose_friends(int num, int *ptr)
            if(a[i]==hash_value){
                    ptr[0]=a[(i+1)%(member_list->len)];
                    ptr[1]=a[(i+2)%(member_list->len)];
+                   break;
            }
    }
 
-done:
-
-   for(i=0;i<MAX_HOSTS;i++){
-           if(ptr[0] == atoi(hb_table[i].host_id))
-                  ptr[0] = i;
-             
-           if(ptr[1] == atoi(hb_table[i].host_id))
-                  ptr[1] = i;
-   }
-
+   done : return 0;
+     
 //  pthread_mutex_unlock(&members_mutex);
 
 }
@@ -661,59 +716,3 @@ void go_live(char *message)
   sprintf(buffer,"%d#%s",JOIN_OPCODE,message);  
 }
        
-
-/*
-void main()
-{ 
-*/
-
-/*
-
-
-char *ptr=(char *)malloc(200);
-strcpy(ptr,"1:0_1380475981:192.168.100.120:1234:123:0:1;1:1_1234567891:192.123.456.678:123:12345:0:0;0::::0::0;0::::0::0;");
-log1=fopen("./log.txt","w");
-struct hb_entry *hb_entry1=extract_message(ptr);
-print_table(hb_entry1);
-
-//char buffer[200]="KARTHIK";
-//sprintf(buffer,"%d::%s",JOIN_OPCODE,"karthik");
-//printf("hellooooooooooooooooooo  %s helooooooooooo",buffer);
-//update_table(hb_entry1);
-
-//printf("\n%s\n",hb_entry1[0].IP);
-//printf("%d\n",hb_entry1[0].valid);
-initialize_table("1234","192.168.100.100",0);
-//printf("%s\n",hb_table[0].IP);
-//printf("%s\n",hb_table[0].host_id);
-
-//char *buffer;
-//printf("i am here\n");
-//buffer=create_message();
-//printf("%s",buffer);
-char buffer[500];
-memset(buffer,0,500);
-update_table(hb_entry1);
-//while(1)
-{
-sleep(1);
-//char *buffer = (char *)malloc(300);
-//update_my_heartbeat();
-check_table_for_failed_hosts();
-create_message(buffer);
-printf("\nbefore conversion %s\n",buffer);
-
-network_to_host(buffer);
-printf("\nnetwork to host : %s\n",buffer);
-host_to_network(buffer);
-printf("\nhost to network : %s\n",buffer);
-print_table(hb_table);
-check_table_for_failed_hosts();
-printf("\n%s\n",buffer);
-memset(buffer,0,500);
-//free(buffer);
-}
-//char *buffer = (char *)malloc(300);
-//create_message(buffer);
-//printf("\n%s\n",buffer);
-}*/
