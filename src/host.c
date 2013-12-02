@@ -990,6 +990,9 @@ int receiveKVFunc()
              }
          }
 
+         sprintf(logMsg, "ACCEPTED SOCKET DESCRIPTOR BY FIRST ACCEPT IN receiveKVFunc() is: %d", clientFd);
+         printToLog(logF,"SOCKET DESCRIPTOR", logMsg);
+
 	 // Debug
 	 printToLog(logF, "recMsg before recvTCP", recMsg);
 
@@ -1964,6 +1967,9 @@ int receiveKVFunc()
 
              // Store the accepted clientFd in a new socket descriptor
              int newClientSd = clientFd;
+
+             sprintf(logMsg, "The new client Socket desc stored before peer routing is %d", newClientSd);
+             printToLog(logF, "SOCKET DESCRIPTOR", logMsg);
          
              struct sockaddr_in peerNodeAddr;
 
@@ -1991,6 +1997,9 @@ int receiveKVFunc()
                  rc = ERROR;
                  continue;
              }
+
+             sprintf(logMsg, "Socket descriptor opened to peer node is: %d", peerSocket);
+             printToLog(logF, "SOCKET DESCRIPTOR", logMsg);
 
              // connect to the peer node
              memset(&peerNodeAddr, 0, sizeof(struct sockaddr_in));
