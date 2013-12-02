@@ -2231,7 +2231,7 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
 
          printToLog(logF, "replicateKV", "CONNECT SUCCESSFUL");
 
-         sprintf(logMsg, "OP CODE RECEIVED", op_instance->opcode);
+         sprintf(logMsg, "OP CODE RECEIVED %d", op_instance->opcode);
          printToLog(logF, "replicateKV", logMsg);
 
          // Based on the op code call the respective replication op code create messages 
