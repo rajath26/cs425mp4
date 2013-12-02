@@ -951,9 +951,8 @@ int receiveKVFunc()
     register int counter;
 
     char recMsg[LONG_BUF_SZ],
-         retMsg[LONG_BUF_SZ];
-
-    char *lookupValue;
+         retMsg[LONG_BUF_SZ],
+         * lookupValue;
 
     socklen_t len;
     
@@ -1559,7 +1558,7 @@ int receiveKVFunc()
 
                      // Lookup on the local key value store
 	             lookupValue = lookup_store_for_key(temp->key);
-                     printToLog(logF, "LOOKUP RETURN STRING", (char*)lookupValue);
+                     printToLog(logF, "LOOKUP RETURN STRING", lookupValue);
         
                      // If an error send an error message to the original
                      // requestor
@@ -2224,7 +2223,7 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
          } 
 
          // Based on the op code call the respective replication op code create messages 
-         switch ( op_code->opcode )
+         switch ( op_instance->opcode )
          {
 
              case INSERT_KV: 
@@ -2240,10 +2239,10 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
                  i_rc = append_port_ip_to_message(op_instance->port, op_instance->IP, replicationMsgToSend);
                  if ( ERROR == i_rc )
                  {
-                     printf("\nError while appending port IP to replication message\n"):
+                     printf("\nError while appending port IP to replication message\n");
                      continue;
                  }
-                 i_rc = append_time_consistency_level(op_instance->timestamp, SUCCESS, replicationMsgToSend);
+                 i_rc = append_time_consistency_level(op_instance->timeStamp, SUCCESS, replicationMsgToSend);
                  if ( ERROR == i_rc )
                  {
                      printf("\nUnable to create insert replication message\n");
@@ -2265,10 +2264,10 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
                  i_rc = append_port_ip_to_message(op_instance->port, op_instance->IP, replicationMsgToSend);
                  if ( ERROR == i_rc )
                  {
-                     printf("\nError while appending port IP to replication message\n"):
+                     printf("\nError while appending port IP to replication message\n");
                      continue;
                  }
-                 i_rc = append_time_consistency_level(op_instance->timestamp, SUCCESS, replicationMsgToSend);
+                 i_rc = append_time_consistency_level(op_instance->timeStamp, SUCCESS, replicationMsgToSend);
                  if ( ERROR == i_rc )
                  {
                      printf("\nUnable to create delete replication message\n");
@@ -2290,10 +2289,10 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
                  i_rc = append_port_ip_to_message(op_instance->port, op_instance->IP, replicationMsgToSend);
                  if ( ERROR == i_rc )
                  {
-                     printf("\nError while appending port IP to replication message\n"):
+                     printf("\nError while appending port IP to replication message\n");
                      continue;
                  }
-                 i_rc = append_time_consistency_level(op_instance->timestamp, SUCCESS, replicationMsgToSend);
+                 i_rc = append_time_consistency_level(op_instance->timeStamp, SUCCESS, replicationMsgToSend);
                  if ( ERROR == i_rc )
                  {
                      printf("\nUnable to create update replication message\n");
@@ -2315,10 +2314,10 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
                  i_rc = append_port_ip_to_message(op_instance->port, op_instance->IP, replicationMsgToSend);
                  if ( ERROR == i_rc )
                  {
-                     printf("\nError while appending port IP to replication message\n"):
+                     printf("\nError while appending port IP to replication message\n");
                      continue;
                  }
-                 i_rc = append_time_consistency_level(op_instance->timestamp, SUCCESS, replicationMsgToSend);
+                 i_rc = append_time_consistency_level(op_instance->timeStamp, SUCCESS, replicationMsgToSend);
                  if ( ERROR == i_rc )
                  {
                      printf("\nUnable to create update replication message\n");
@@ -2355,7 +2354,7 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
          }
 
          printToLog(logF, ipAddress, "Response received for replication message");
-         printToLog(logF, ipAddress, repsonse);
+         printToLog(logF, ipAddress, response);
 
          i_rc = extract_message_op(response, &temp);
          if ( ERROR == i_rc )
@@ -2365,7 +2364,7 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
              continue;
          }
 
-         printToLog(logF, "successfully extracted message", recMsg);
+         printToLog(logF, "successfully extracted message", response);
          sprintf(logMsg, "opcode: %d", temp->opcode);
          printToLog(logF, ipAddress, logMsg);
 
@@ -2390,7 +2389,7 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
                  sprintf(logMsg, "REPLICATION OPERATION ON PEER NODE SUCCESSFUL. PEER NODE PORT: %d PEER IP ADDRESS: %s", replicaPort, ipAddrReplica);
                  printf("\n%s\n", logMsg);
                  printToLog(logF, ipAddress, logMsg);
-                 numOfAck++
+                 numOfAck++;
              break;
 
              case LOOKUP_RESULT:
