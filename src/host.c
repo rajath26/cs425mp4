@@ -2135,7 +2135,9 @@ int localKVReorderFunc()
         sprintf(logMsg, "Reorder trigger value: %d", reOrderTrigger);
         printToLog(logF, ipAddress, logMsg);
 
-        if (reOrderTrigger && !systemIsLeaving ) 
+        guint m = g_hash_table_size(key_value_store);
+
+        if (reOrderTrigger && !systemIsLeaving && (int)m) 
         {
             printToLog(logF, "REORGANIZING KV STORE", "REORG");
             reorganize_key_value_store();
