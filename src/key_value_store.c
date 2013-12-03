@@ -332,7 +332,7 @@ int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy)
 
                // 2) Send the insert message to the peer node 
                memset(message, '\0', 4096);
-               create_message_INSERT_LEAVE(atoi((char *)key),(char *)value,message);
+               create_message_INSERT_LEAVE(atoi((char *)key),((struct value_group *)value)->value,message);
                append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,message);
                append_time_consistency_level(-1, 0, message);
                strcpy(port,hb_table[i].port);
