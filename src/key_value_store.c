@@ -455,9 +455,12 @@ struct op_code* retrieve_from_temp_list()
 
 void print_key_value(gpointer key,gpointer value, gpointer dummy){
          funcEntry(logF,NULL,"print_key_value");
+         int yesIamOwner = 0;
          pthread_mutex_lock(&key_value_mutex);
+         if (iAmOwner(value, my_hash_value))
+             yesIamOwner = 1;
          printf("\n\t*******************************\n");
-         printf("\tKEY : %s - VALUE : %s\n",(char *)key,((struct value_group*)value)->value);
+         printf("\tKEY : %s - VALUE : %s I am owner ?: %d\n",(char *)key,((struct value_group*)value)->value, yesIamOwner);
          printf("\n\t*******************************\n");
           
          pthread_mutex_unlock(&key_value_mutex);
