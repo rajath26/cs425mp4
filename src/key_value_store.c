@@ -734,6 +734,8 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
                     }
 
                     create_message_REP_INSERT(&missingOpCode, repMsg);
+                    append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,repMsg);
+                    append_time_consistency_level(-1, 0, repMsg);
 
                     sendTCP(missingSocket, repMsg, 4096);
  
@@ -819,7 +821,6 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
             {
                 memset(message, '\0', 4096);
                 create_message_INSERT(atoi((char *)key),((struct value_group *)value)->value,message);
-
                 sprintf(logMsg, "PORT: %s, IP : %s , message: %s", port, IP, message);
                 printToLog(logF, "PROCESS_KEY_VALUE", logMsg);
                 append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,message);         
