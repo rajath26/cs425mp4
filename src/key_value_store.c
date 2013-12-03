@@ -755,6 +755,8 @@ int create_hash_table(){
    }
 }
 
+
+char* lookup_store_for_key(int key);
 // send an opcode instance which is dynamically allocated
 //
 int insert_key_value_into_store(struct op_code* op_instance){
@@ -765,7 +767,7 @@ int insert_key_value_into_store(struct op_code* op_instance){
      buffer = (char*)malloc(200);
      sprintf(buffer,"%d",op_instance->key);
 
-     gpointer value_old = lookup_store_for_key(op_instance->key);
+     char* value_old = lookup_store_for_key(op_instance->key);
      if(value_old){
           delete_key_value_from_store(op_instance->key);
       }
