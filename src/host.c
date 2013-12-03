@@ -2377,6 +2377,33 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
              
              break;
 
+             case INSERT_LEAVE_KV:
+
+                 i_rc = create_message_REP_INSERT(op_instance, replicationMsgToSend);
+                 printToLog(logF, "replicateKV", "message returned by create_message_REP_INSERT");
+                 printToLog(logF, "replicateKV", replicationMsgToSend);
+                 if ( ERROR == i_rc )
+                 {
+                     printf("\nUnable to create insert replication message\n");
+                     continue;
+                 }
+                 i_rc = append_port_ip_to_message(op_instance->port, op_instance->IP, replicationMsgToSend);
+                 if ( ERROR == i_rc )
+                 {
+                     printf("\nError while appending port IP to replication message\n");
+                     continue;
+                 }
+                 printToLog(logF, "replicateKV", replicationMsgToSend);
+                 i_rc = append_time_consistency_level(op_instance->timeStamp, SUCCESS, replicationMsgToSend);
+                 if ( ERROR == i_rc )
+                 {
+                     printf("\nUnable to create insert replication message\n");
+                     continue;
+                 }
+                 printToLog(logF, "replicateKV", replicationMsgToSend);
+
+             break;
+
              case DELETE_KV:
         
                  i_rc = create_message_REP_DELETE(op_instance, replicationMsgToSend);

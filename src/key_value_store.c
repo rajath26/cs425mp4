@@ -113,6 +113,9 @@ int areFriendsAlive(gpointer value){
 int iAmOwner(gpointer value,int hash_value){
    funcEntry(logF,NULL,"iAmOwner");
    struct value_group* value_inst = (struct value_group *)value;
+   sprintf(logMsg, "OWNER IN GPOINTER VALUE : %d;;;; PASSED IN HASH VALUE: %d", value_inst->owner, hash_value);
+   printToLog(logF, "I AM OWNER DEBUG INFO", logMsg);
+   
    if(value_inst->owner == hash_value) {
    funcExit(logF,NULL,"iAmOwner",1);
    return 1;
