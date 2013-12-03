@@ -586,7 +586,7 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
 
             // 2i) Send it to rehashed peer node
             memset(message, '\0', 4096);
-            create_message_INSERT(atoi((char *)key),(char *)value,message);
+            create_message_INSERT(atoi((char *)key),((struct value_group *)value)->value,message);
             sprintf(logMsg, "PORT: %s, IP : %s , message: %s", hb_table[host_no].port, hb_table[host_no].port, message);
             printToLog(logF, "PROCESS_KEY_VALUE", logMsg);
             append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,message);         
@@ -826,7 +826,7 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
                 append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,message);         
                 append_time_consistency_level(-1, 0, message);
 
-                if ( (0 == strcmp(port, hb_table[host_no].port)) && (0 == strcmp(IP, hb_table[host_no].IP)) && i == host_no )
+                /*if ( (0 == strcmp(port, hb_table[host_no].port)) && (0 == strcmp(IP, hb_table[host_no].IP)) && i == host_no )
                 {
 
                     printToLog(logF, "p_k_v", "OWNER DEAD AND I AM ONLY NEW OWNER SO LOCAL INSERT");
@@ -850,7 +850,7 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
 
                     goto delete_replica;
 
-                }
+                }*/
             
                 printToLog(logF, "p_k_v", "Owner dead and sending INSERT to new owner");
 
@@ -891,7 +891,9 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
 
                 // 2ii) Delete from the KV store
                 //delete_key_value_from_store(atoi((char *)key));
-                rc = 1;
+                // If I am only owner then do not delete
+                if (! ((0 == strcmp(port, hb_table[host_no].port)) && (0 == strcmp(IP, hb_table[host_no].IP)) && i == host_no )) 
+                    rc = 1;
 
                 delete_replica:
 
