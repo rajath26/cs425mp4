@@ -786,7 +786,7 @@ struct value_group{
 
      gpointer value = (gpointer)value_obj;
 
-     g_hash_table_insert(key_value_store,key,value);
+     g_hash_table_replace(key_value_store,key,value);
      pthread_mutex_unlock(&key_value_mutex);
      funcExit(logF,NULL,"insert_key_value_into_store",0);
 }
