@@ -465,12 +465,11 @@ void prepareNodeForSystemLeave(){
          printf("\n%s\n", logMsg);
           if(m==0)
           {
-              pthread_mutex_unlock(&table_mutex);
               return;
           }
-         pthread_mutex_lock(&key_value_mutex);
+         //pthread_mutex_lock(&key_value_mutex);
          g_hash_table_foreach_remove(key_value_store,prepare_system_for_leave,NULL);
-         pthread_mutex_unlock(&key_value_mutex);
+         //pthread_mutex_unlock(&key_value_mutex);
          funcExit(logF,NULL,"prepareNodeForSystemLeave",0);
 }
 
@@ -503,14 +502,14 @@ struct op_code* retrieve_from_temp_list()
 void print_key_value(gpointer key,gpointer value, gpointer dummy){
          funcEntry(logF,NULL,"print_key_value");
          int yesIamOwner = 0;
-         pthread_mutex_lock(&key_value_mutex);
+         //pthread_mutex_lock(&key_value_mutex);
          if (iAmOwner(value, my_hash_value))
              yesIamOwner = 1;
          printf("\n\t*******************************\n");
          printf("\tKEY : %s - VALUE : %s ::: I am owner ?: %d ::: Owner: %d ::: F1 : %d ::: F2 : %d \n",(char *)key,((struct value_group*)value)->value, yesIamOwner, ((struct value_group*)value)->owner, ((struct value_group*)value)->friend1, ((struct value_group*)value)->friend2);
          printf("\n\t*******************************\n");
           
-         pthread_mutex_unlock(&key_value_mutex);
+         //pthread_mutex_unlock(&key_value_mutex);
          funcExit(logF,NULL,"print_key_value",0);
 }
 
@@ -740,9 +739,9 @@ void reorganize_key_value_store(){
              return;
          guint m = g_hash_table_size(key_value_store);
          if(m==0) return;
-         pthread_mutex_lock(&key_value_mutex);
+         //pthread_mutex_lock(&key_value_mutex);
          g_hash_table_foreach_remove(key_value_store,process_key_value,NULL);
-         pthread_mutex_unlock(&key_value_mutex);
+         //pthread_mutex_unlock(&key_value_mutex);
          reOrderTrigger=0;         
          funcExit(logF,NULL,"reorganize_key_value_store",0);
 }
@@ -763,15 +762,15 @@ void print_key_value(char *key,char *value){
 
 int create_hash_table(){
    funcEntry(logF,NULL,"create_hash_table");
-   pthread_mutex_lock(&key_value_mutex);
+   //pthread_mutex_lock(&key_value_mutex);
    key_value_store =  g_hash_table_new(g_str_hash,g_str_equal);
    if(key_value_store == NULL){
-             pthread_mutex_unlock(&key_value_mutex); 
+             //pthread_mutex_unlock(&key_value_mutex); 
              funcExit(logF,NULL,"create_hash_table",0);
              return -1;
    }
    else{
-             pthread_mutex_unlock(&key_value_mutex); 
+             //pthread_mutex_unlock(&key_value_mutex); 
              funcExit(logF,NULL,"create_hash_table",0);
              return 0;
    }
