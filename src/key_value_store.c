@@ -432,6 +432,7 @@ void prepareNodeForSystemLeave(){
          pthread_mutex_lock(&table_mutex);
          hb_table[host_no].valid = 0;
          hb_table[host_no].status = 0;
+         pthread_mutex_unlock(&table_mutex);
          update_host_list();
          guint m = g_hash_table_size(key_value_store);
          sprintf(logMsg, "The Hash table size during leaveSystem is : %d", (int)m);
@@ -445,7 +446,6 @@ void prepareNodeForSystemLeave(){
          pthread_mutex_lock(&key_value_mutex);
          g_hash_table_foreach_remove(key_value_store,prepare_system_for_leave,NULL);
          pthread_mutex_unlock(&key_value_mutex);
-         pthread_mutex_unlock(&table_mutex);
          funcExit(logF,NULL,"prepareNodeForSystemLeave",0);
 }
 
