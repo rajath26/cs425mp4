@@ -1030,6 +1030,9 @@ void * FEfunction(void *clientFdPassed)
 
     struct op_code *temp = NULL;          // KV OPCODE
 
+    struct value_group check;
+    int iAmAlreadyOwnerOfThis = 0;
+
          memset(recMsg, '\0', LONG_BUF_SZ);
          memset(retMsg, '\0', LONG_BUF_SZ);
          lookupValue = NULL;
@@ -1771,8 +1774,22 @@ void * FEfunction(void *clientFdPassed)
  
                  case REP_DELETE: 
 
+                     check.owner = temp->owner;
+
+                     // Before deleting replica find if I have also become the new owner 
+                     // and I am alive in the distributed system
+                     if (iAmOwner( (gpointer)(&check), my_hash_value ) )
+                         iAmAlreadyOwnerOfThis = 1;
+
+                     if ( iAmAlreadyOwnerOfThis )
+                     {
+                         i_rc = SUCCESS;
+                     }
+                     
+
                      // Delete the KV pair in to the KV store
-                     i_rc = delete_key_value_from_store(temp->key);
+                     if (!iAmAlreadyOwnerOfThis)
+                         i_rc = delete_key_value_from_store(temp->key);
                      // If error send an error message to the original 
                      // requestor
                      if ( ERROR == i_rc )
@@ -1808,7 +1825,14 @@ void * FEfunction(void *clientFdPassed)
                      // requestor
                      else
                      {
-                         sprintf(logMsg, "KV pair %d = %s SUCCESSFULLY DELETED", temp->key, temp->value);
+                         if (!iAmAlreadyOwnerOfThis)
+                         {
+                             sprintf(logMsg, "KV pair %d = %s SUCCESSFULLY DELETED", temp->key, temp->value);
+                         }
+                         else 
+                         {
+                             strcpy(logMsg, "Deletion skipped because I am already owner");
+                         }
                          printToLog(logF, ipAddress, logMsg);
                          i_rc = create_message_DELETE_RESULT_SUCCESS(temp->key, retMsg);
                          if ( ERROR == i_rc )
