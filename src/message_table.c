@@ -193,6 +193,79 @@ int chooseFriendsForReplication(int *ptr)
 
 }
 //still work to do
+int chooseFriendsForHim(int *ptr, int hisHashValue)
+{
+   funcEntry(logF,NULL,"choose_friends_him");
+         
+   pthread_mutex_lock(&members_mutex);                                            // put print to log here
+   pthread_mutex_lock(&table_mutex);
+   member_list = g_array_new(FALSE,FALSE,sizeof(int));// change 1
+
+//   pthread_mutex_lock(&members_mutex);
+   int j = 0;
+   int i = 0;
+   int hash_value = hisHashValue;
+   // copy the hash id and index
+   for(i=0;i<MAX_HOSTS;i++){
+            if(hb_table[i].valid && hb_table[i].status){
+                        int val = atoi(hb_table[i].host_id);
+                        g_array_append_val(member_list, val);
+            }
+   }
+   g_array_sort(member_list,(GCompareFunc)my_int_sort_function);
+   
+   int a[member_list->len];
+   for(i=0;i<member_list->len;i++){                 //
+         a[i] = g_array_index(member_list,int,i);
+   }
+
+   if(member_list->len == 0){  // impossible case
+           funcExit(logF,NULL,"choose_friends",-1);
+           pthread_mutex_unlock(&members_mutex);
+           pthread_mutex_unlock(&table_mutex);
+           return -1;
+   }
+
+   if(member_list->len == 1){  // when only i am alive
+           funcExit(logF,NULL,"choose_friends",-1);
+           pthread_mutex_unlock(&members_mutex);
+           pthread_mutex_unlock(&table_mutex);
+           return -1;
+    }
+
+   if(member_list->len == 2){  // only one friend possible           
+           if (a[0]==hash_value){
+                   ptr[0]=a[1];    // put the hash value of the friend
+                   ptr[1]=-1;  // error case
+           }
+           else {
+                   ptr[0]=a[0];   // put the hash value of the friend
+                   ptr[1]=-1;   // error case
+           }
+     goto done;
+   }   
+              
+   printToLog(logF,"I am here","yesssssssssss");
+   for(i=0;i<member_list->len;i++){          
+           if(a[i]==hash_value){
+                   ptr[0]=a[(i+1)%(member_list->len)];
+                   ptr[1]=a[(i+2)%(member_list->len)];
+                   break;
+           }
+   }
+
+   done : 
+           pthread_mutex_unlock(&members_mutex);
+           pthread_mutex_unlock(&table_mutex);
+ 
+           sprintf(logMsg, "FINAL SET OF FRIENDS CHOSEN ARE THESE TWO: %d --------- %d", ptr[0], ptr[1]);
+           printToLog(logF, "HERE ARE MY FRIENDS", logMsg);
+           funcExit(logF,NULL,"choose_friends_him",0);
+           return 0;
+
+}
+
+
 
 int choose_host_hb_index(int key)
 {

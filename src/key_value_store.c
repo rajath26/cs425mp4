@@ -149,9 +149,23 @@ int delete_replica_from_friends(gpointer key, gpointer value, int chosenOwner)
     char deleteResponse[4096];
     struct sockaddr_in friend1Addr;
     int numOfBytesSent;
+    int hisFriendList[2];
+    int hisFren1, hisFren2;
 
     struct op_code temp1,
                    temp2;
+
+    i_rc = chooseFriendsForHim(hisFriendList, atoi(hb_table[chosenOwner].host_id));
+    if ( i_rc != 0 )
+    {
+        hisFren1 = 0;
+        hisFren2 = 0;
+    }
+    else
+    {
+        hisFren1 = giveIndexForHash(hisFriendList[0]);
+        hisFren2 = giveIndexForHash(hisFriendList[1]);
+    }    
 
     // Get friend1 hash value in the chord
     friend1 = ((struct value_group *)value)->friend1;
@@ -167,7 +181,7 @@ int delete_replica_from_friends(gpointer key, gpointer value, int chosenOwner)
         goto friend2Label;
     }
 
-    if ( index1 == chosenOwner )
+    if ( index1 == chosenOwner || index1 == hisFren1 || index1 == hisFren2 )
         goto friend2Label; 
 
     friend1Port = atoi(hb_table[index1].port);
@@ -247,7 +261,7 @@ int delete_replica_from_friends(gpointer key, gpointer value, int chosenOwner)
                    goto rtn;
                }
 
-               if ( index2 == chosenOwner )
+               if ( index2 == chosenOwner || index2 == hisFren1 || index2 == hisFren2 )
                    goto rtn;
 
                friend2Port = atoi(hb_table[index2].port);
