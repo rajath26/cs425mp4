@@ -114,7 +114,7 @@ int iAmOwner(gpointer value,int hash_value){
    funcEntry(logF,NULL,"iAmOwner");
    struct value_group* value_inst = (struct value_group *)value;
    if(value_inst->owner == hash_value) {
-   funcExit(logF,NULL,"iAmOwner",0);
+   funcExit(logF,NULL,"iAmOwner",1);
    return 1;
    }
    else{
@@ -585,6 +585,7 @@ void process_key_value(gpointer key,gpointer value, gpointer dummy)
                 // Fill in information in struct op_code and replicate
                 temp->opcode = 1;
                 temp->key = atoi((char *)key);
+                temp->value = (char *) malloc (strlen(((struct value_group *)value)->value));
                 strcpy(temp->value, ((struct value_group *)value)->value);
                 strcpy(temp->port, hb_table[host_no].port);
                 strcpy(temp->IP, hb_table[host_no].IP);

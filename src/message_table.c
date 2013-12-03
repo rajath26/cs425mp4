@@ -181,6 +181,9 @@ int chooseFriendsForReplication(int *ptr)
 
    done : 
            pthread_mutex_unlock(&members_mutex);
+ 
+           sprintf(logMsg, "FINAL SET OF FRIENDS CHOSEN ARE THESE TWO: %d --------- %d", ptr[0], ptr[1]);
+           printToLog(logF, "HERE ARE MY FRIENDS", logMsg);
            funcExit(logF,NULL,"choose_friends",0);
            return 0;
 
