@@ -126,6 +126,7 @@ int chooseFriendsForReplication(int *ptr)
    funcEntry(logF,NULL,"choose_friends");
          
    pthread_mutex_lock(&members_mutex);                                            // put print to log here
+   pthread_mutex_lock(&table_mutex);
    member_list = g_array_new(FALSE,FALSE,sizeof(int));// change 1
 
 //   pthread_mutex_lock(&members_mutex);
@@ -149,12 +150,14 @@ int chooseFriendsForReplication(int *ptr)
    if(member_list->len == 0){  // impossible case
            funcExit(logF,NULL,"choose_friends",-1);
            pthread_mutex_unlock(&members_mutex);
+           pthread_mutex_unlock(&table_mutex);
            return -1;
    }
 
    if(member_list->len == 1){  // when only i am alive
            funcExit(logF,NULL,"choose_friends",-1);
            pthread_mutex_unlock(&members_mutex);
+           pthread_mutex_unlock(&table_mutex);
            return -1;
     }
 
@@ -181,6 +184,7 @@ int chooseFriendsForReplication(int *ptr)
 
    done : 
            pthread_mutex_unlock(&members_mutex);
+           pthread_mutex_unlock(&table_mutex);
  
            sprintf(logMsg, "FINAL SET OF FRIENDS CHOSEN ARE THESE TWO: %d --------- %d", ptr[0], ptr[1]);
            printToLog(logF, "HERE ARE MY FRIENDS", logMsg);
@@ -201,6 +205,7 @@ int choose_host_hb_index(int key)
     int hash_value = g_str_hash(buffer) % 360;
  //   int a[member_list->len];
     pthread_mutex_lock(&members_mutex); 
+    pthread_mutex_lock(&table_mutex);
     member_list = g_array_new(FALSE,FALSE,sizeof(int));
     for(i=0;i<MAX_HOSTS;i++){
             if(hb_table[i].valid && hb_table[i].status){
@@ -220,6 +225,7 @@ int choose_host_hb_index(int key)
     // impossible case, expect atleast one element to be present
     if( member_list->len == 0){
            pthread_mutex_unlock(&members_mutex); 
+           pthread_mutex_unlock(&table_mutex);
            return -1;
     }
     // if only one member is present
@@ -268,11 +274,14 @@ int choose_host_hb_index(int key)
           if(atoi(hb_table[i].host_id)==result){
                     funcExit(logF,NULL,"choose_host_hb_index",i);
                     pthread_mutex_unlock(&members_mutex); 
+                    pthread_mutex_unlock(&table_mutex);
                     return i;
           }
        }
    }             
   pthread_mutex_unlock(&members_mutex); 
+  pthread_mutex_unlock(&table_mutex);
+
 }
 /*
  *  This function is used for deleting an entry in the table

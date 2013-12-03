@@ -146,6 +146,10 @@ int delete_replica_from_friends(gpointer key, gpointer value)
     char deleteResponse[4096];
     struct sockaddr_in friend1Addr;
     int numOfBytesSent;
+
+    struct op_code temp1,
+                   temp2;
+
     // Get friend1 hash value in the chord
     friend1 = ((struct value_group *)value)->friend1;
     // Get the index of friend 1 from the membership protocol
@@ -189,8 +193,14 @@ int delete_replica_from_friends(gpointer key, gpointer value)
         rc = -1;
         goto friend2Label;
     }
+
+    temp1.key = atoi((char *)key);
+    temp1.value = NULL;
+    temp1.owner = my_hash_value;
+    temp1.friend1 = ((struct value_group *)value)->friend1;
+    temp1.friend2 = ((struct value_group *)value)->friend2;
                
-    create_message_DELETE((int *)key, deleteMsg);
+    create_message_REP_DELETE(&temp1, deleteMsg);
     append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,deleteMsg);
     append_time_consistency_level(-1, 0, deleteMsg);
  
@@ -260,7 +270,13 @@ int delete_replica_from_friends(gpointer key, gpointer value)
                    goto rtn;
                }
 
-               create_message_DELETE((int *)key, deleteMsg);
+               temp2.key = atoi((char *)key);
+               temp2.value = NULL;
+               temp2.owner = my_hash_value;
+               temp2.friend1 = ((struct value_group *)value)->friend1;
+               temp2.friend2 = ((struct value_group *)value)->friend2;
+
+               create_message_REP_DELETE(&temp2, deleteMsg);
                append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,deleteMsg);
                append_time_consistency_level(-1, 0, deleteMsg);
 
