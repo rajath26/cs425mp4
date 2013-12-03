@@ -1307,6 +1307,9 @@ void * FEfunction(void *clientFdPassed)
                      temp->owner = my_hash_value;
                      temp->friend1 = friendList[0];
                      temp->friend2 = friendList[1];
+
+                     sprintf(logMsg, "INSERT_LEAVE_KV DEBUG INFO owner: %d f1: %d f2: %d", temp->owner, temp->friend1, temp->friend2);
+                     printToLog(logF, "INSERT_LEAVE_KV DEBUG INFO", logMsg);
  
                      // Insert the KV pair in to the KV store 
                      i_rc = insert_key_value_into_store(temp);
