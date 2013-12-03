@@ -460,7 +460,7 @@ void print_key_value(gpointer key,gpointer value, gpointer dummy){
          if (iAmOwner(value, my_hash_value))
              yesIamOwner = 1;
          printf("\n\t*******************************\n");
-         printf("\tKEY : %s - VALUE : %s I am owner ?: %d\n",(char *)key,((struct value_group*)value)->value, yesIamOwner);
+         printf("\tKEY : %s - VALUE : %s ::: I am owner ?: %d ::: Owner: %d ::: F1 : %d ::: F2 : %d \n",(char *)key,((struct value_group*)value)->value, yesIamOwner, ((struct value_group*)value)->owner, ((struct value_group*)value)->friend1, ((struct value_group*)value)->friend2);
          printf("\n\t*******************************\n");
           
          pthread_mutex_unlock(&key_value_mutex);
