@@ -618,13 +618,13 @@ int print_table(struct hb_entry *table)
    int i=0;
    
    printf("\n valid\t::\thost_id\t\t::\tIP\t\t::\tPORT\t::\tHB_COUNT\t::\tTIME STAMP\t::\tSTATUS\n");
-   pthread_mutex_lock(&table_mutex);
+  // pthread_mutex_lock(&table_mutex);
    for(i=0;i<MAX_HOSTS;i++){
    if(table[i].valid){ 
    printf("%d\t::\t%s\t::\t%s\t::\t%s\t::\t%d\t\t::\t%s\t\t::\t%d\n",table[i].valid,table[i].host_id,table[i].IP,table[i].port,table[i].hb_count,table[i].time_stamp,table[i].status);
     }
    }
-   pthread_mutex_unlock(&table_mutex);
+  // pthread_mutex_unlock(&table_mutex);
    return 0;
 }
 

@@ -63,7 +63,7 @@ int isOwnerAlive(gpointer value){
              }
      }
     if(owneralive){
-       funcExit(logF,NULL,"isOwnerAlive",0);  
+       funcExit(logF,NULL,"isOwnerAlive",1);  
        return 1;
     }
     else
@@ -155,17 +155,38 @@ int delete_replica_from_friends(gpointer key, gpointer value, int chosenOwner)
     struct op_code temp1,
                    temp2;
 
-    i_rc = chooseFriendsForHim(hisFriendList, atoi(hb_table[chosenOwner].host_id));
-    if ( i_rc != 0 )
-    {
-        hisFren1 = 0;
-        hisFren2 = 0;
+    if ( chosenOwner == host_no )
+    { 
+
+        i_rc = chooseFriendsForReplication(hisFriendList);
+        if ( i_rc != 0 )
+        {
+            hisFren1 = 0;
+            hisFren2 = 0;
+        }
+        else
+        {
+           hisFren1 = giveIndexForHash(hisFriendList[0]);
+           hisFren2 = giveIndexForHash(hisFriendList[1]);
+        } 
+
     }
     else
     {
-        hisFren1 = giveIndexForHash(hisFriendList[0]);
-        hisFren2 = giveIndexForHash(hisFriendList[1]);
-    }    
+
+        i_rc = chooseFriendsForHim(hisFriendList, atoi(hb_table[chosenOwner].host_id));
+        if ( i_rc != 0 )
+        {
+            hisFren1 = 0;
+            hisFren2 = 0;
+        }
+        else
+        {
+           hisFren1 = giveIndexForHash(hisFriendList[0]);
+           hisFren2 = giveIndexForHash(hisFriendList[1]);
+        }
+
+    }
 
     // Get friend1 hash value in the chord
     friend1 = ((struct value_group *)value)->friend1;
@@ -646,6 +667,8 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
                 temp->friend1 = friendList[0];
                 temp->friend2 = friendList[1]; 
                 
+                // TO DO load time stamp
+                
                 // 3ii) If your friends are not alive then re-replicate
                 tempAck = replicateKV(temp, friendList);
                 if (2 != tempAck)
@@ -670,13 +693,38 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
         else
         {
             memset(message, '\0', 4096);
-            create_message_INSERT(atoi((char *)key),(char *)value,message);
+            create_message_INSERT(atoi((char *)key),((struct value_group *)value)->value,message);
 
-            sprintf(logMsg, "PORT: %s, IP : %s , message: %s", hb_table[host_no].port, hb_table[host_no].port, message);
+            sprintf(logMsg, "PORT: %s, IP : %s , message: %s", port, IP, message);
             printToLog(logF, "PROCESS_KEY_VALUE", logMsg);
             append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,message);         
             append_time_consistency_level(-1, 0, message);
+
+            if ( port == hb_table[host_no].port && (0 == strcmp(IP, hb_table[host_no].IP)) && i == host_no )
+            {
+
+                // Owner is dead and it rehashed to me itself so just do a local insert
+                struct op_code local;
+                int myfriends[2];
+                i_rc = chooseFriendsForReplication(myfriends);
+                if ( -1 == i_rc )
+                    goto socket;
+
+                local.key = atoi((char *)key);
+                local.value = ((struct value_group *)value)->value;
+                local.owner = my_hash_value;
+                local.friend1 = myfriends[0];
+                local.friend2 = myfriends[1];
+
+                insert_key_value_into_store(&local);
+
+                rc = 0;
+
+                goto delete_replica;
+
+            }
             
+            socket:
             sd = socket(AF_INET, SOCK_STREAM, 0);
             if ( -1 == sd )
             {
@@ -714,6 +762,8 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
             // 2ii) Delete from the KV store
             //delete_key_value_from_store(atoi((char *)key));
             rc = 1;
+
+            delete_replica:
 
             // 2iii) Delete the replicas
             i_rc = delete_replica_from_friends(key, value, i);
