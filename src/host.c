@@ -1181,6 +1181,8 @@ void * FEfunction(void *clientFdPassed)
 	     {
 
 	         case INSERT_KV:
+
+                     printf("\nINSERT_KV\n");
                      
                      // Choose two friends to replicate this key value
                      i_rc = chooseFriendsForReplication(friendList);
@@ -1292,6 +1294,8 @@ void * FEfunction(void *clientFdPassed)
 
                  case INSERT_LEAVE_KV:
 
+                     printf("\nINSERT_LEAVE_KV\n");
+
                      i_rc = chooseFriendsForReplication(friendList);
                      if ( ERROR == i_rc )
                      {
@@ -1392,6 +1396,8 @@ void * FEfunction(void *clientFdPassed)
                  break;
 
 		 case DELETE_KV:
+
+                     printf("\nDELETE_KV\n");
 
                      // Choose two friends to replicate this key value
                      i_rc = chooseFriendsForReplication(friendList);
@@ -1498,6 +1504,8 @@ void * FEfunction(void *clientFdPassed)
 
 		 case UPDATE_KV:
 
+                     printf("\nUPDATE_KV\n");
+
                      // Choose two friends to replicate this key value
                      i_rc = chooseFriendsForReplication(friendList);
                      if ( ERROR == i_rc )
@@ -1599,6 +1607,8 @@ void * FEfunction(void *clientFdPassed)
 		 break;
 
 		 case LOOKUP_KV:
+
+                     printf("\nLOOKUP_KV\n");
 
                      // Choose two friends to replicate this key value
                      i_rc = chooseFriendsForReplication(friendList);
@@ -1705,6 +1715,8 @@ void * FEfunction(void *clientFdPassed)
 
                  case REP_INSERT:
 
+                     printf("\nREP_INSERT\n");
+
                      // Insert the KV pair in to the KV store
                      i_rc = insert_key_value_into_store(temp);
                      // If error send an error message to the original
@@ -1773,6 +1785,8 @@ void * FEfunction(void *clientFdPassed)
                  break;
  
                  case REP_DELETE: 
+
+                     printf("\nREP_DELETE\n");
 
                      check.owner = temp->owner;
 
@@ -1864,6 +1878,8 @@ void * FEfunction(void *clientFdPassed)
 
                  case REP_UPDATE:
 
+                     printf("\nREP_UPDATE\n");
+
                      // Update KV in to the KV store
                      i_rc = update_key_value_in_store(temp);
                      // if error send an error message to the original
@@ -1930,6 +1946,8 @@ void * FEfunction(void *clientFdPassed)
                  break;
  
                  case REP_LOOKUP:
+
+                     printf("\nREP_LOOKUP\n");
 
                      // Lookup on the local key value store
                      lookupValue = lookup_store_for_key(temp->key);
@@ -2001,26 +2019,32 @@ void * FEfunction(void *clientFdPassed)
                  break;
 
 		 case LOOKUP_RESULT:
+                     printf("\nLOOKUP_RESULT\n");
                      // Nothing here as of now 
 		 break;
 
 		 case INSERT_RESULT:
+                     printf("\nINSERT_RESULT\n");
                      // Nothing here as of now 
 		 break;
 
 		 case DELETE_RESULT:
+                     printf("\nDELETE_RESULT\n");
                      // Nothing here as of now 
 		 break;
 
 		 case UPDATE_RESULT:
+                     printf("\nUPDATE_RESULT\n");
                      // Nothing here as of now 
 		 break;
 
                  case ERROR_RESULT:
+                     printf("\nERROR_RESULT\n");
                      // Nothing here as of now
                  break;
 
                  default:
+                     printf("\nDEFAULT OP CODE\n");
 		     // We should never ever be here 
 		     sprintf(logMsg, "Invalid KV OP code received so just continue along");
 		     printToLog(logF, ipAddress, logMsg);
