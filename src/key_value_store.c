@@ -156,9 +156,6 @@ int delete_replica_from_friends(gpointer key, gpointer value, int chosenOwner)
     // Get friend1 hash value in the chord
     friend1 = ((struct value_group *)value)->friend1;
     
-    if ( friend1 == chosenOwner )
-        goto friend2Label;
-
     // Get the index of friend 1 from the membership protocol
     index1 = giveIndexForHash(friend1);
     if ( ERROR == index1 )
@@ -169,6 +166,9 @@ int delete_replica_from_friends(gpointer key, gpointer value, int chosenOwner)
         rc = -1;
         goto friend2Label;
     }
+
+    if ( index1 == chosenOwner )
+        goto friend2Label; 
 
     friend1Port = atoi(hb_table[index1].port);
     strcpy(friend1IP, hb_table[index1].IP);
@@ -236,9 +236,6 @@ int delete_replica_from_friends(gpointer key, gpointer value, int chosenOwner)
                // Get friend2 hash value in the chord
                friend2 = ((struct value_group *)value)->friend2;
 
-               if ( friend2 == chosenOwner )
-                   goto rtn;
- 
                // Get the index of friend 1 from the membership protocol
                index2 = giveIndexForHash(friend2);
                if ( ERROR == index2 )
@@ -249,6 +246,9 @@ int delete_replica_from_friends(gpointer key, gpointer value, int chosenOwner)
                    rc = -1;
                    goto rtn;
                }
+
+               if ( index2 == chosenOwner )
+                   goto rtn;
 
                friend2Port = atoi(hb_table[index2].port);
                strcpy(friend2IP, hb_table[index2].IP);
