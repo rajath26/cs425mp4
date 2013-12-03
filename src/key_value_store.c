@@ -421,8 +421,14 @@ void prepareNodeForSystemLeave(){
          sprintf(logMsg, "The Hash table size during leaveSystem is : %d", (int)m);
          printToLog(logF, "THE HASH TABLE SIZE DURING LEAVESYSTEM IS", logMsg);
          printf("\n%s\n", logMsg);
-          if(m==0)return;
+          if(m==0)
+          {
+              pthread_mutex_unlock(&table_mutex);
+              return;
+          }
+         pthread_mutex_lock(&key_value_mutex);
          g_hash_table_foreach_remove(key_value_store,prepare_system_for_leave,NULL);
+         pthread_mutex_unlock(&key_value_mutex);
          pthread_mutex_unlock(&table_mutex);
          funcExit(logF,NULL,"prepareNodeForSystemLeave",0);
 }
@@ -467,9 +473,12 @@ void print_key_value(gpointer key,gpointer value, gpointer dummy){
          funcExit(logF,NULL,"print_key_value",0);
 }
 
-void process_key_value(gpointer key,gpointer value, gpointer dummy)
+int process_key_value(gpointer key,gpointer value, gpointer dummy)
 {
+
+   
     funcEntry(logF,NULL,"process_key_value");
+    int rc = 0;
     update_host_list();
     int i = choose_host_hb_index(atoi((char*)key));         
     int i_rc;
@@ -493,7 +502,10 @@ void process_key_value(gpointer key,gpointer value, gpointer dummy)
     // if it is empty return
     guint m = g_hash_table_size(key_value_store);
     if(m==0)
+    {
+        rc = 0;
         return;
+    }
  
     /////
     // 1) Check if you are the owner of this entry
@@ -550,7 +562,8 @@ void process_key_value(gpointer key,gpointer value, gpointer dummy)
             }
 
             // 2ii) Delete from the KV store
-            delete_key_value_from_store(atoi((char *)key));
+            //delete_key_value_from_store(atoi((char *)key));
+            rc = 1;
 
             // 2iii) Delete the replicas
             i_rc = delete_replica_from_friends(key, value);
@@ -659,7 +672,8 @@ void process_key_value(gpointer key,gpointer value, gpointer dummy)
             }
 
             // 2ii) Delete from the KV store
-            delete_key_value_from_store(atoi((char *)key));
+            //delete_key_value_from_store(atoi((char *)key));
+            rc = 1;
 
             // 2iii) Delete the replicas
             i_rc = delete_replica_from_friends(key, value);
@@ -676,6 +690,7 @@ void process_key_value(gpointer key,gpointer value, gpointer dummy)
         if ( -1 != sd )
             close(sd);
         funcExit(logF,NULL,"process_key_value",0);
+        return rc;
 
 }
 void reorganize_key_value_store(){
@@ -684,7 +699,9 @@ void reorganize_key_value_store(){
              return;
          guint m = g_hash_table_size(key_value_store);
          if(m==0) return;
-         g_hash_table_foreach(key_value_store,process_key_value,NULL);
+         pthread_mutex_lock(&key_value_mutex);
+         g_hash_table_foreach_remove(key_value_store,process_key_value,NULL);
+         pthread_mutex_unlock(&key_value_mutex);
          reOrderTrigger=0;         
          funcExit(logF,NULL,"reorganize_key_value_store",0);
 }
