@@ -573,12 +573,16 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
     /////
     if (iAmOwner(value, my_hash_value))
     {
+
+        printToLog(logF, "p_k_v", "I am owner of this entry");
         /////
         // 2) If you are the owner of the entry and it has rehashed to another 
         // peer node then
         /////
         if (i != host_no)
         {
+
+            printToLog(logF, "p_k_v", "Rehashed to someone else so sending the KV to them and attempt delete replicas");
 
             // 2i) Send it to rehashed peer node
             memset(message, '\0', 4096);
@@ -639,45 +643,134 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
         /////
         else
         {
-            // 3i) Check if your friends are alive
-            if (!areFriendsAlive(value))
-            {
-                friendsAlive = 0;
-            }
-     
-            // Case 1: If one or both of your friends are not alive
-            if ( friendsAlive == 0 )
-            {
-                // Choose two friends to replicate this key value
-                i_rc = chooseFriendsForReplication(friendList);
-                if ( ERROR == i_rc )
-                {
-                    printToLog(logF, ipAddress, "Unable to choose friends for replication");
-                    goto rtn;
-                }
 
-                // Fill in information in struct op_code and replicate
-                temp->opcode = 1;
-                temp->key = atoi((char *)key);
-                temp->value = (char *) malloc (strlen(((struct value_group *)value)->value));
-                strcpy(temp->value, ((struct value_group *)value)->value);
-                strcpy(temp->port, hb_table[host_no].port);
-                strcpy(temp->IP, hb_table[host_no].IP);
-                temp->owner = my_hash_value;
-                temp->friend1 = friendList[0];
-                temp->friend2 = friendList[1]; 
-                
-                // TO DO load time stamp
-                
-                // 3ii) If your friends are not alive then re-replicate
-                tempAck = replicateKV(temp, friendList);
-                if (2 != tempAck)
+            printToLog(logF, "p_k_v", "Rehashed to myself so find my friends as of now. See if the found friends as of now are same as hash table and hence determine any change and act accordingly");
+
+            int friendsNow[2];
+            int missingIndex;
+            int bothFriendsDead = 0;
+            int friend1Missing = 0;
+            int friend2Missing = 0;
+            int friendsNowFirstChosen = 0;
+            int friendsNowSecondChosen = 0;
+   
+            // Check who are my friends as of now 
+            chooseFriendsForReplication(friendsNow);
+
+            // Check if the friends chosen as of now are same as the current value
+            if ( ( ((friendsNow[0] == ((struct value_group *)value)->friend1) || (friendsNow[0] == ((struct value_group *)value)->friend2)) ) && ( ( (friendsNow[1] == ((struct value_group *)value)->friend1) || (friendsNow[1] == ((struct value_group *)value)->friend2) ) ) )
+            {
+                printToLog(logF, "p_k_v", "IGNORE");
+                // No topology change OR
+                // Friends Alive 
+                // so IGNORE
+            }
+            else
+            {
+                printToLog(logF, "p_k_v", "OOPS SOMETHING HAS CHANGED");
+                if ( ((friendsNow[0] != ((struct value_group *)value)->friend1) && (friendsNow[0] != ((struct value_group *)value)->friend2)) && ((friendsNow[1] == ((struct value_group *)value)->friend1) || (friendsNow[1] == ((struct value_group *)value)->friend2) ) )
                 {
-                    printToLog(logF, ipAddress, "One or both of my friends had died and I tried to replicate and that also failed :(");
-                    printToLog(logF, ipAddress, "Not a hard stop continue");
-                }       
-            } // End of if ( friendsAlive == 0 )
-            
+                    missingIndex = giveIndexForHash(friendsNow[0]);
+                    friendsNowFirstChosen = 1;
+                    if ( friendsNow[1] == ((struct value_group *)value)->friend1 )
+                       friend2Missing = 1;
+                    else
+                       friend1Missing = 1; 
+                }
+                else if ( ((friendsNow[1] != ((struct value_group *)value)->friend1) && (friendsNow[1] != ((struct value_group *)value)->friend2)) && ((friendsNow[0] == ((struct value_group *)value)->friend1) || (friendsNow[0] == ((struct value_group *)value)->friend2) ) )
+                {
+                    missingIndex = giveIndexForHash(friendsNow[1]);
+                    friendsNowSecondChosen = 1;
+                    if ( friendsNow[0] == ((struct value_group *)value)->friend1 )
+                       friend2Missing = 1;
+                    else
+                       friend1Missing = 1;
+                }
+                else if ( ((friendsNow[0] != ((struct value_group *)value)->friend1) && (friendsNow[0] != ((struct value_group *)value)->friend2)) && ((friendsNow[1] != ((struct value_group *)value)->friend1) && (friendsNow[1] != ((struct value_group *)value)->friend2)) )
+                    bothFriendsDead = 1;
+
+                if (!bothFriendsDead)
+                {
+                    printToLog(logF, "p_k_v", "only one friend dead");
+                    sprintf(logMsg, "Dead friend replaced by this guy : %d", atoi(hb_table[missingIndex].host_id));
+                    printToLog(logF, "p_k_v", logMsg); 
+
+                    int missingPort = atoi(hb_table[missingIndex].port);
+                    char missingIP[100];
+                    char repMsg[4096];
+                    char response[4096];
+                    struct sockaddr_in missingAddr;
+                    struct op_code missingOpCode;
+                    strcpy(missingIP, hb_table[missingIndex].IP);
+
+                    int missingSocket = socket(AF_INET, SOCK_STREAM, 0);
+
+                    memset(&missingAddr, 0, sizeof(struct sockaddr_in));
+                    missingAddr.sin_family = AF_INET;
+                    missingAddr.sin_port = htons(missingPort);
+                    missingAddr.sin_addr.s_addr = inet_addr(missingIP);
+                    memset(&(missingAddr.sin_zero), '\0', 8);
+ 
+                    connect(missingSocket, (struct sockaddr *) &missingAddr, sizeof(missingAddr));
+
+                    missingOpCode.key = atoi((char *)key);
+                    missingOpCode.value = ((struct value_group *)value)->value;
+                    missingOpCode.owner = my_hash_value;
+                    if (friend1Missing)
+                    {
+                        missingOpCode.friend1 = atoi(hb_table[missingIndex].host_id);
+                        if (friendsNowFirstChosen)
+                            missingOpCode.friend2 = friendsNow[1];
+                        else
+                            missingOpCode.friend2 = friendsNow[0];
+                    }
+                    if (friend2Missing)
+                    {
+                        missingOpCode.friend2 = atoi(hb_table[missingIndex].host_id);
+                        if (friendsNowFirstChosen)
+                            missingOpCode.friend1 = friendsNow[1];
+                        else
+                            missingOpCode.friend1 = friendsNow[0];
+                    }
+
+                    create_message_REP_INSERT(&missingOpCode, repMsg);
+
+                    sendTCP(missingSocket, repMsg, 4096);
+ 
+                    recvTCP(missingSocket, response, 4096);
+
+                    close(missingSocket);
+
+                    printToLog(logF, "p_k_v", "Updating local KV store");
+                    update_key_value_in_store(&missingOpCode);
+                    
+                } // End of if (!bothFriendsDead)
+                else
+                {
+
+                    printToLog(logF, "p_k_v", "Both friends dead");
+
+                    temp->opcode = 1;
+                    temp->key = atoi((char *)key);
+                    temp->value = (char *) malloc (strlen(((struct value_group *)value)->value));
+                    strcpy(temp->value, ((struct value_group *)value)->value);
+                    strcpy(temp->port, hb_table[host_no].port);
+                    strcpy(temp->IP, hb_table[host_no].IP);
+                    temp->owner = my_hash_value;
+                    temp->friend1 = friendList[0];
+                    temp->friend2 = friendList[1]; 
+                
+                    // TO DO load time stamp
+                
+                    // 3ii) If your friends are not alive then re-replicate
+                    tempAck = replicateKV(temp, friendList);
+                    if (2 != tempAck)
+                    {
+                        printToLog(logF, ipAddress, "One or both of my friends had died and I tried to replicate and that also failed :(");
+                        printToLog(logF, ipAddress, "Not a hard stop continue");
+                    }       
+                } // End of else of if (!bothFriendsDead)
+            } // End of else
         } // End of else of if (i != host_no)
 
     } // End of if (iAmOwner(value, my_hash_value))
@@ -686,92 +779,130 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
     /////
     else
     {
+
+        printToLog(logF, "p_k_v", "I am not owner");
+
         if(isOwnerAlive(value))
         {
-            printToLog(logF, ipAddress, "Owner of this entry alive. So ignore");
+            int hisFriends[2];
+            printToLog(logF, ipAddress, "Owner of this entry alive. SO check his friends as of now and update local entry");
+            chooseFriendsForHim(hisFriends, ((struct value_group*)value)->owner);
+            struct op_code update;
+            update.key = atoi((char *)key);
+            update.value = ((struct value_group *)value)->value;
+            update.owner = ((struct value_group *)value)->owner;
+            update.friend1 = hisFriends[0];
+            update.friend2 = hisFriends[1];
+ 
+            update_key_value_in_store(&update);
         }
         else
         {
-            memset(message, '\0', 4096);
-            create_message_INSERT(atoi((char *)key),((struct value_group *)value)->value,message);
-
-            sprintf(logMsg, "PORT: %s, IP : %s , message: %s", port, IP, message);
-            printToLog(logF, "PROCESS_KEY_VALUE", logMsg);
-            append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,message);         
-            append_time_consistency_level(-1, 0, message);
-
-            if ( port == hb_table[host_no].port && (0 == strcmp(IP, hb_table[host_no].IP)) && i == host_no )
+ 
+            printToLog(logF, "p_k_v", "Owner dead. Check if you are closest friend or closest friend is dead. If either is true find entry new owner");
+            int closestFriend = 0;
+            int closestFriendDead = 0;
+            if (((struct value_group *)value)->friend1 == my_hash_value)
+                closestFriend = 1;
+            else 
             {
+                // Find if Closest friend is alive
+                int closestFrenIndex = giveIndexForHash(((struct value_group *)value)->friend1);
+                if ( hb_table[closestFrenIndex].status == 0 && hb_table[closestFrenIndex].valid == 0 )
+                    closestFriendDead = 1;
+            }
+            if (closestFriend)
+                printToLog(logF, "p_k_v", "I am closest friend");
+            else 
+                printToLog(logF, "p_k_v", "Closest friend dead");
+            if ( closestFriend || closestFriendDead )
+            {
+                memset(message, '\0', 4096);
+                create_message_INSERT(atoi((char *)key),((struct value_group *)value)->value,message);
 
-                // Owner is dead and it rehashed to me itself so just do a local insert
-                struct op_code local;
-                int myfriends[2];
-                i_rc = chooseFriendsForReplication(myfriends);
+                sprintf(logMsg, "PORT: %s, IP : %s , message: %s", port, IP, message);
+                printToLog(logF, "PROCESS_KEY_VALUE", logMsg);
+                append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,message);         
+                append_time_consistency_level(-1, 0, message);
+
+                if ( (0 == strcmp(port, hb_table[host_no].port)) && (0 == strcmp(IP, hb_table[host_no].IP)) && i == host_no )
+                {
+
+                    printToLog(logF, "p_k_v", "OWNER DEAD AND I AM ONLY NEW OWNER SO LOCAL INSERT");
+
+                    // Owner is dead and it rehashed to me itself so just do a local insert
+                    struct op_code local;
+                    int myfriends[2];
+                    i_rc = chooseFriendsForReplication(myfriends);
+                    if ( -1 == i_rc )
+                        goto socket;
+
+                    local.key = atoi((char *)key);
+                    local.value = ((struct value_group *)value)->value;
+                    local.owner = my_hash_value;
+                    local.friend1 = myfriends[0];
+                    local.friend2 = myfriends[1];
+    
+                    insert_key_value_into_store(&local);
+ 
+                    rc = 0;
+
+                    goto delete_replica;
+
+                }
+            
+                printToLog(logF, "p_k_v", "Owner dead and sending INSERT to new owner");
+
+                socket:
+                sd = socket(AF_INET, SOCK_STREAM, 0);
+                if ( -1 == sd )
+                {
+                    printf("\nUnable to open socket in prepare_system_for_leave\n");
+                    goto rtn;
+                }
+                
+                memset(&peer, 0, sizeof(struct sockaddr_in));
+                peer.sin_family = AF_INET;
+                peer.sin_port = htons(atoi(port));
+                peer.sin_addr.s_addr = inet_addr(IP);
+                memset(&(peer.sin_zero), '\0', 8);
+
+                i_rc = connect(sd, (struct sockaddr *) &peer, sizeof(peer));
+                if ( i_rc != 0 )
+                {
+                   printf("\nCant connect to server in prepare_system_for_leave\n");
+                   goto rtn;
+                }
+
+                int numOfBytesSent = sendTCP(sd, message, sizeof(message));
+                if ( 0 == numOfBytesSent )
+                {
+                    printf("\nZERO BYTES SENT IN prepare_system_for_leave\n");
+                    goto rtn;
+                }
+
+                int numOfBytesRec = recvTCP(sd, response, 4096);
+                if ( 0 == numOfBytesRec )
+                {
+                   printf("\nZERO BYTES RECEIVED IN prepare_system_for_leave\n");
+                   goto rtn;
+                }
+
+                // 2ii) Delete from the KV store
+                //delete_key_value_from_store(atoi((char *)key));
+                rc = 1;
+
+                delete_replica:
+
+                // 2iii) Delete the replicas
+                i_rc = delete_replica_from_friends(key, value, i);
                 if ( -1 == i_rc )
-                    goto socket;
+                {
+                    printToLog(logF, ipAddress, "Deletion of replicas on friends failed. But this is not a hard stop");
 
-                local.key = atoi((char *)key);
-                local.value = ((struct value_group *)value)->value;
-                local.owner = my_hash_value;
-                local.friend1 = myfriends[0];
-                local.friend2 = myfriends[1];
+                } 
 
-                insert_key_value_into_store(&local);
-
-                rc = 0;
-
-                goto delete_replica;
-
-            }
-            
-            socket:
-            sd = socket(AF_INET, SOCK_STREAM, 0);
-            if ( -1 == sd )
-            {
-                printf("\nUnable to open socket in prepare_system_for_leave\n");
-                goto rtn;
-            }
-            
-            memset(&peer, 0, sizeof(struct sockaddr_in));
-            peer.sin_family = AF_INET;
-            peer.sin_port = htons(atoi(port));
-            peer.sin_addr.s_addr = inet_addr(IP);
-            memset(&(peer.sin_zero), '\0', 8);
-
-            i_rc = connect(sd, (struct sockaddr *) &peer, sizeof(peer));
-            if ( i_rc != 0 )
-            {
-               printf("\nCant connect to server in prepare_system_for_leave\n");
-               goto rtn;
-            }
-
-            int numOfBytesSent = sendTCP(sd, message, sizeof(message));
-            if ( 0 == numOfBytesSent )
-            {
-               printf("\nZERO BYTES SENT IN prepare_system_for_leave\n");
-               goto rtn;
-            }
-
-            int numOfBytesRec = recvTCP(sd, response, 4096);
-            if ( 0 == numOfBytesRec )
-            {
-               printf("\nZERO BYTES RECEIVED IN prepare_system_for_leave\n");
-               goto rtn;
-            }
-
-            // 2ii) Delete from the KV store
-            //delete_key_value_from_store(atoi((char *)key));
-            rc = 1;
-
-            delete_replica:
-
-            // 2iii) Delete the replicas
-            i_rc = delete_replica_from_friends(key, value, i);
-            if ( -1 == i_rc )
-            {
-                printToLog(logF, ipAddress, "Deletion of replicas on friends failed. But this is not a hard stop");
-
-            } 
+            } // End of if ( closestFriend || closestFriendDead )
 
         } // End of else of if(isOwnerAlive)
     } // End of else of if (iAmOwner(value, my_hash_value))
