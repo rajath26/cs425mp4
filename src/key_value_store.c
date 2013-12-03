@@ -128,7 +128,7 @@ int iAmOwner(gpointer value,int hash_value){
 
 
 
-int delete_replica_from_friends(gpointer key, gpointer value)
+int delete_replica_from_friends(gpointer key, gpointer value, int chosenOwner)
 {
 
     funcEntry(logF, NULL, "delete_replica_from_friends");
@@ -155,6 +155,10 @@ int delete_replica_from_friends(gpointer key, gpointer value)
 
     // Get friend1 hash value in the chord
     friend1 = ((struct value_group *)value)->friend1;
+    
+    if ( friend1 == chosenOwner )
+        goto friend2Label;
+
     // Get the index of friend 1 from the membership protocol
     index1 = giveIndexForHash(friend1);
     if ( ERROR == index1 )
@@ -231,6 +235,10 @@ int delete_replica_from_friends(gpointer key, gpointer value)
                memset(deleteResponse, '\0', 4096);
                // Get friend2 hash value in the chord
                friend2 = ((struct value_group *)value)->friend2;
+
+               if ( friend2 == chosenOwner )
+                   goto rtn;
+ 
                // Get the index of friend 1 from the membership protocol
                index2 = giveIndexForHash(friend2);
                if ( ERROR == index2 )
@@ -408,7 +416,7 @@ int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy)
                //delete_key_value_from_store(atoi((char *)key));
 
                // 3) DELETE THE REPLICAS of this entry
-               i_rc = delete_replica_from_friends(key, value);
+               i_rc = delete_replica_from_friends(key, value, i);
                if ( -1 == i_rc )
                {
                    printToLog(logF, ipAddress, "Error during deletion of replicas from friends");
@@ -585,7 +593,7 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
             rc = 1;
 
             // 2iii) Delete the replicas
-            i_rc = delete_replica_from_friends(key, value);
+            i_rc = delete_replica_from_friends(key, value, i);
             if ( -1 == i_rc )
             {
                 printToLog(logF, ipAddress, "Deletion of replicas on friends failed. But this is not a hard stop");
@@ -695,7 +703,7 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
             rc = 1;
 
             // 2iii) Delete the replicas
-            i_rc = delete_replica_from_friends(key, value);
+            i_rc = delete_replica_from_friends(key, value, i);
             if ( -1 == i_rc )
             {
                 printToLog(logF, ipAddress, "Deletion of replicas on friends failed. But this is not a hard stop");
@@ -767,10 +775,10 @@ int insert_key_value_into_store(struct op_code* op_instance){
      buffer = (char*)malloc(200);
      sprintf(buffer,"%d",op_instance->key);
 
-     char* value_old = lookup_store_for_key(op_instance->key);
+     /*char* value_old = lookup_store_for_key(op_instance->key);
      if(value_old){
           delete_key_value_from_store(op_instance->key);
-      }
+      }*/
 
      gpointer key = (gpointer)buffer;
 
