@@ -2149,6 +2149,7 @@ void * FEfunction(void *clientFdPassed)
          close(clientFd);
          printToLog(logF, "SEE HERE", "peerSocket closing before the end of the loop");
          close(peerSocket);
+         free(ptr);
 
   rtn:
     funcExit(logF, "THREAD FUNCTON EXIT", "FEfunction", 0);
@@ -2306,6 +2307,7 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
          memset(replicationMsgToSend, '\0', LONG_BUF_SZ);
          memset(ipAddrReplica, '\0', SMALL_BUF_SZ);
          memset(response, '\0', LONG_BUF_SZ);
+         replicaSocket = 0;
 
          replicaSocket = socket(AF_INET, SOCK_STREAM, 0);
          if ( ERROR == replicaSocket )
@@ -2321,6 +2323,7 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
          if ( ERROR == index )
          {
              printToLog(logF, ipAddress, "Unable to get index of friend");
+             close(replicaSocket);
              continue;
          }
 
@@ -2344,6 +2347,7 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
              strcpy(logMsg, "Cannot connect to server during replication");
              printToLog(logF, ipAddress, logMsg);
              printf("\n%s\n", logMsg); 
+             close(replicaSocket);
              continue;
          } 
 
@@ -2364,6 +2368,7 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
                  if ( ERROR == i_rc )
                  {
                      printf("\nUnable to create insert replication message\n");
+                     close(replicaSocket);
                      continue;
                  } 
                  i_rc = append_port_ip_to_message(op_instance->port, op_instance->IP, replicationMsgToSend);
@@ -2377,6 +2382,7 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
                  if ( ERROR == i_rc )
                  {
                      printf("\nUnable to create insert replication message\n");
+                     close(replicaSocket);
                      continue;
                  }
                  printToLog(logF, "replicateKV", replicationMsgToSend);
@@ -2391,12 +2397,14 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
                  if ( ERROR == i_rc )
                  {
                      printf("\nUnable to create insert replication message\n");
+                     close(replicaSocket);
                      continue;
                  }
                  i_rc = append_port_ip_to_message(op_instance->port, op_instance->IP, replicationMsgToSend);
                  if ( ERROR == i_rc )
                  {
                      printf("\nError while appending port IP to replication message\n");
+                     close(replicaSocket);
                      continue;
                  }
                  printToLog(logF, "replicateKV", replicationMsgToSend);
@@ -2404,6 +2412,7 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
                  if ( ERROR == i_rc )
                  {
                      printf("\nUnable to create insert replication message\n");
+                     close(replicaSocket);
                      continue;
                  }
                  printToLog(logF, "replicateKV", replicationMsgToSend);
@@ -2418,12 +2427,14 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
                  if ( ERROR == i_rc )
                  {
                      printf("\nUnable to create delete replication message\n");
+                     close(replicaSocket);
                      continue;
                  }
                  i_rc = append_port_ip_to_message(op_instance->port, op_instance->IP, replicationMsgToSend);
                  if ( ERROR == i_rc )
                  {
                      printf("\nError while appending port IP to replication message\n");
+                     close(replicaSocket);
                      continue;
                  }
                  printToLog(logF, "replicateKV", replicationMsgToSend);
@@ -2431,6 +2442,7 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
                  if ( ERROR == i_rc )
                  {
                      printf("\nUnable to create delete replication message\n");
+                     close(replicaSocket);
                      continue;
                  }
                  printToLog(logF, "replicateKV", replicationMsgToSend);
@@ -2445,12 +2457,14 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
                  if ( ERROR == i_rc )
                  {
                      printf("\nUnable to create update replication message\n");
+                     close(replicaSocket);
                      continue;
                  }
                  i_rc = append_port_ip_to_message(op_instance->port, op_instance->IP, replicationMsgToSend);
                  if ( ERROR == i_rc )
                  {
                      printf("\nError while appending port IP to replication message\n");
+                     close(replicaSocket);
                      continue;
                  }
                  printToLog(logF, "replicateKV", replicationMsgToSend);
@@ -2458,6 +2472,7 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
                  if ( ERROR == i_rc )
                  {
                      printf("\nUnable to create update replication message\n");
+                     close(replicaSocket);
                      continue;
                  }
                  printToLog(logF, "replicateKV", replicationMsgToSend);
@@ -2472,12 +2487,14 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
                  if ( ERROR == i_rc )
                  {
                      printf("\nUnable to create update replication message\n");
+                     close(replicaSocket);
                      continue;
                  }
                  i_rc = append_port_ip_to_message(op_instance->port, op_instance->IP, replicationMsgToSend);
                  if ( ERROR == i_rc )
                  {
                      printf("\nError while appending port IP to replication message\n");
+                     close(replicaSocket);
                      continue;
                  }
                  printToLog(logF, "replicateKV", replicationMsgToSend);
@@ -2485,6 +2502,7 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
                  if ( ERROR == i_rc )
                  {
                      printf("\nUnable to create update replication message\n");
+                     close(replicaSocket);
                      continue;
                  }
                  printToLog(logF, "replicateKV", replicationMsgToSend);
@@ -2496,6 +2514,7 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
                  // We should never ever be here 
                  sprintf(logMsg, "Invalid KV OP code received so just continue along");
                  printToLog(logF, ipAddress, logMsg);
+                 close(replicaSocket);
                  continue;
 
              break;
@@ -2509,6 +2528,7 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
          if ( SUCCESS == numOfBytesSent )
          {
              printToLog(logF, ipAddress, "ZERO BYTES SENT"); 
+             close(replicaSocket);
              continue;
          }
 
@@ -2517,6 +2537,7 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
          if ( SUCCESS == numOfBytesRec )
          {
              printToLog(logF, ipAddress, "ZERO BYTES RECEIVED");
+             close(replicaSocket);
              continue;
          }
 
@@ -2528,6 +2549,7 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
          {
              sprintf(logMsg, "Unable to extract received message. Return code of extract_message_op = %d", i_rc);
              printToLog(logF, ipAddress, logMsg); 
+             close(replicaSocket);
              continue;
          }
 
@@ -2580,6 +2602,8 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
              break;
 
          } // End of switch( temp->opcode )
+
+         close(replicaSocket);
          
     } // End of for ( counter = 0; counter < NUM_OF_FRIENDS; counter++)
 
