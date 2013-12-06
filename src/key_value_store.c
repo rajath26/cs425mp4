@@ -769,21 +769,26 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
 
                     printToLog(logF, "p_k_v", "Both friends dead");
 
-                    struct op_code temp1;
+                    struct op_code *temp1;
+                    char insMsg[4096];
+                    int myF[2];
 
-                    temp1.opcode = 1;
-                    temp1.key = atoi((char *)key);
-                    temp1.value = ((struct value_group *)value)->value;
-                    strcpy(temp1.port, hb_table[host_no].port);
-                    strcpy(temp1.IP, hb_table[host_no].IP);
-                    temp1.owner = my_hash_value;
-                    temp1.friend1 = friendList[0];
-                    temp1.friend2 = friendList[1]; 
-                
+                    create_message_INSERT(atoi((char *)key), ((struct value_group *)value)->value, insMsg);
+                    append_port_ip_to_message(hb_table[host_no].port, hb_table[host_no].IP, insMsg);
+                    append_time_consistency_level(-1, 0, insMsg);
+
+                    extract_message_op(insMsg, &temp);
+
+                    chooseFriendsForReplication(myF);
+
+                    temp->owner = my_hash_value;
+                    temp->friend1 = myF[0];
+                    temp->friend2 = myF[1];
+
                     // TO DO load time stamp
                 
                     // 3ii) If your friends are not alive then re-replicate
-                    tempAck = replicateKV(&temp1, friendList);
+                    tempAck = replicateKV(&temp1, myF);
                     if (2 != tempAck)
                     {
                         printToLog(logF, ipAddress, "One or both of my friends had died and I tried to replicate and that also failed :(");

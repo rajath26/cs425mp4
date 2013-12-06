@@ -32,11 +32,14 @@ pthread_mutex_t members_mutex;
 int my_hash_value;
 
 int giveIndexForHash(int hash_value){
+   funcEntry(logF, NULL, "giveIndexForHash");
    int i;
    for(i=0;i<MAX_HOSTS;i++){
       if( atoi(hb_table[i].host_id)==hash_value )
+        funcExit(logF, NULL, "giveIndexForHash", i);
         return i;
    }
+   funcExit(logF, NULL, "giveIndexForHash", -1);
    return -1;
 }   
 
