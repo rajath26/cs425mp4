@@ -584,6 +584,8 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
         if (i != host_no)
         {
 
+            int fHim[2];
+
             printToLog(logF, "p_k_v", "Rehashed to someone else so sending the KV to them and attempt delete replicas");
 
             // 2i) Send it to rehashed peer node
@@ -636,9 +638,14 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
 
             printToLog(logF, "p_k_v", "Receive Successful in HEREE HEREHEREE ");
 
+            chooseFriendsForHim(fHim, atoi(hb_table[i].host_id));
+            
             // 2ii) Delete from the KV store
             //delete_key_value_from_store(atoi((char *)key));
-            rc = 1;
+            if ( my_hash_value != fHim[0] && my_hash_value != fHim[1])
+                rc = 1;
+            else 
+                rc = 0;
 
             // 2iii) Delete the replicas
             i_rc = delete_replica_from_friends(key, value, i);
@@ -819,7 +826,7 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
             else
             {
                 printToLog(logF, "p_k_v", "I am not in hisFriends list anymore hence delete this entry");
-                delete_key_value_from_store(atoi((char *)key));
+                rc = 1;
             }
         }
         else
@@ -845,7 +852,7 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
             {
                 memset(message, '\0', 4096);
                 create_message_INSERT(atoi((char *)key),((struct value_group *)value)->value,message);
-                sprintf(logMsg, "PORT: %s, IP : %s , message: %s", port, IP, message);
+                sprintf(logMsg, "PORT: %s, IP : %s , message: %s", hb_table[i].port, hb_table[i].IP, message);
                 printToLog(logF, "PROCESS_KEY_VALUE", logMsg);
                 append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,message);         
                 append_time_consistency_level(-1, 0, message);
@@ -878,7 +885,6 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
             
                 printToLog(logF, "p_k_v", "Owner dead and sending INSERT to new owner");
 
-                socket:
                 sd = socket(AF_INET, SOCK_STREAM, 0);
                 if ( -1 == sd )
                 {
@@ -888,8 +894,8 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
                 
                 memset(&peer, 0, sizeof(struct sockaddr_in));
                 peer.sin_family = AF_INET;
-                peer.sin_port = htons(atoi(port));
-                peer.sin_addr.s_addr = inet_addr(IP);
+                peer.sin_port = htons(atoi(hb_table[i].port));
+                peer.sin_addr.s_addr = inet_addr(hb_table[i].IP);
                 memset(&(peer.sin_zero), '\0', 8);
 
                 i_rc = connect(sd, (struct sockaddr *) &peer, sizeof(peer));
@@ -916,10 +922,8 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
                 // 2ii) Delete from the KV store
                 //delete_key_value_from_store(atoi((char *)key));
                 // If I am only owner then do not delete
-                if (! ((0 == strcmp(port, hb_table[host_no].port)) && (0 == strcmp(IP, hb_table[host_no].IP)) && i == host_no )) 
+                if (! ((0 == strcmp(hb_table[i].port, hb_table[host_no].port)) && (0 == strcmp(hb_table[i].IP, hb_table[host_no].IP)) && i == host_no )) 
                     rc = 1;
-
-                delete_replica:
 
                 // 2iii) Delete the replicas
                 i_rc = delete_replica_from_friends(key, value, i);
