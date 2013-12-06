@@ -36,8 +36,10 @@ int giveIndexForHash(int hash_value){
    int i;
    for(i=0;i<MAX_HOSTS;i++){
       if( atoi(hb_table[i].host_id)==hash_value )
+      {
         funcExit(logF, NULL, "giveIndexForHash", i);
         return i;
+      }
    }
    funcExit(logF, NULL, "giveIndexForHash", -1);
    return -1;
@@ -147,8 +149,8 @@ int chooseFriendsForReplication(int *ptr)
    }
    g_array_sort(member_list,(GCompareFunc)my_int_sort_function);
    
-   //int *a = (int *)malloc(sizeof(int)*(member_list->len));
-   int a[member_list->len];
+   int *a = (int *)malloc(sizeof(int)*(member_list->len));
+   //int a[member_list->len];
 
    if(a==NULL) return -1;
 
@@ -167,7 +169,7 @@ int chooseFriendsForReplication(int *ptr)
            funcExit(logF,NULL,"choose_friends",-1);
      //      pthread_mutex_unlock(&members_mutex);
      //      pthread_mutex_unlock(&table_mutex);
-      //     free(a);
+           free(a);
            return -1;
     }
 
@@ -195,7 +197,7 @@ int chooseFriendsForReplication(int *ptr)
    done : 
        //    pthread_mutex_unlock(&members_mutex);
        //    pthread_mutex_unlock(&table_mutex);
-        //   free(a);
+         free(a);
            sprintf(logMsg, "FINAL SET OF FRIENDS CHOSEN ARE THESE TWO: %d --------- %d", ptr[0], ptr[1]);
            printToLog(logF, "HERE ARE MY FRIENDS", logMsg);
            funcExit(logF,NULL,"choose_friends",0);

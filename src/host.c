@@ -1196,6 +1196,9 @@ void * FEfunction(void *clientFdPassed)
                      temp->owner = my_hash_value;
                      temp->friend1 = friendList[0];
                      temp->friend2 = friendList[1];
+
+                     sprintf(logMsg, "FRIENDS CHOSEN: f1: %d: f2: %d", temp->friend1, temp->friend2);
+                     printToLog(logF, "FRIENDS CHOSEN", logMsg);
 		     
                      // Insert the KV pair in to the KV store
                      i_rc = insert_key_value_into_store(temp);
