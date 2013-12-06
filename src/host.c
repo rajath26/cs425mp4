@@ -1231,7 +1231,7 @@ void * FEfunction(void *clientFdPassed)
                                 goto rtn;
                             }
 			    numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
-			    if ( SUCCESS == numOfBytesSent )
+			    if ( SUCCESS == numOfBytesSent || ERROR == numOfBytesSent )
 			    {
                                 printToLog(logF, ipAddress, "ZERO BYTES SENT");
                                 goto rtn;
@@ -1281,7 +1281,7 @@ void * FEfunction(void *clientFdPassed)
                                  goto rtn;
                              }
 			     numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
-	                     if ( SUCCESS == numOfBytesSent )
+	                     if ( SUCCESS == numOfBytesSent || ERROR == numOfBytesSent )
 		             {
 			        printToLog(logF, ipAddress, "ZERO BYTES SENT");
                                 goto rtn;
@@ -1342,7 +1342,7 @@ void * FEfunction(void *clientFdPassed)
                                 goto rtn;
                             }
                             numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
-                            if ( SUCCESS == numOfBytesSent )
+                            if ( SUCCESS == numOfBytesSent || ERROR == numOfBytesSent )
                             {
                                 printToLog(logF, ipAddress, "ZERO BYTES SENT");
                                 goto rtn;
@@ -1389,7 +1389,7 @@ void * FEfunction(void *clientFdPassed)
                                  goto rtn;
                              }
                              numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
-                             if ( SUCCESS == numOfBytesSent )
+                             if ( SUCCESS == numOfBytesSent || ERROR == numOfBytesSent )
                              {
                                  printToLog(logF, ipAddress, "ZERO BYTES SENT");
                                  goto rtn;
@@ -1448,7 +1448,7 @@ void * FEfunction(void *clientFdPassed)
                                goto rtn;
                            }
                            numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
-                           if ( SUCCESS == numOfBytesSent )
+                           if ( SUCCESS == numOfBytesSent || ERROR == numOfBytesSent )
                            {
                                printToLog(logF, ipAddress, "ZERO BYTES SENT");
                                goto rtn;
@@ -1496,7 +1496,7 @@ void * FEfunction(void *clientFdPassed)
                                  goto rtn;
                              }
                              numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
-                             if ( SUCCESS == numOfBytesSent )
+                             if ( SUCCESS == numOfBytesSent || ERROR == numOfBytesSent )
                              {
                                  printToLog(logF, ipAddress, "ZERO BYTES SENT");
                                  goto rtn;
@@ -1555,7 +1555,7 @@ void * FEfunction(void *clientFdPassed)
                                goto rtn;
                            }
                            numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
-                           if ( SUCCESS == numOfBytesSent )
+                           if ( SUCCESS == numOfBytesSent || ERROR == numOfBytesSent )
                            {
                                printToLog(logF, ipAddress, "ZERO BYTES SENT");
                                goto rtn;
@@ -1600,7 +1600,7 @@ void * FEfunction(void *clientFdPassed)
                                  goto rtn;
                              }
                              numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
-                             if ( SUCCESS == numOfBytesSent )
+                             if ( SUCCESS == numOfBytesSent || ERROR == numOfBytesSent )
                              {
                                  printToLog(logF, ipAddress, "ZERO BYTES SENT");
                                  goto rtn;
@@ -1660,7 +1660,7 @@ void * FEfunction(void *clientFdPassed)
                               goto rtn;
                           }
                          numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
-                         if ( SUCCESS == numOfBytesSent )
+                         if ( SUCCESS == numOfBytesSent || ERROR == numOfBytesSent )
                          {
                              printToLog(logF, ipAddress, "ZERO BYTES SENT");
                              goto rtn;
@@ -1707,7 +1707,7 @@ void * FEfunction(void *clientFdPassed)
                                  goto rtn;
                              }
                              numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
-                             if ( SUCCESS == numOfBytesSent )
+                             if ( SUCCESS == numOfBytesSent || ERROR == numOfBytesSent )
                              {
                                  printToLog(logF, ipAddress, "ZERO BYTES SENT");
                                  goto rtn;
@@ -1750,7 +1750,7 @@ void * FEfunction(void *clientFdPassed)
                              goto rtn;
                          }
                          numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
-                         if ( SUCCESS == numOfBytesSent )
+                         if ( SUCCESS == numOfBytesSent || ERROR == numOfBytesSent )
                          {
                              printToLog(logF, ipAddress, "ZERO BYTES SENT");
                              goto rtn;
@@ -1781,7 +1781,7 @@ void * FEfunction(void *clientFdPassed)
                              goto rtn;
                          }
                          numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
-                         if ( SUCCESS == numOfBytesSent )
+                         if ( SUCCESS == numOfBytesSent || numOfBytesSent == ERROR )
                          {
                              printToLog(logF, ipAddress, "ZERO BYTES SENT");
                              goto rtn;
@@ -1835,7 +1835,7 @@ void * FEfunction(void *clientFdPassed)
                              goto rtn;
                          }
                          numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
-                         if ( SUCCESS == numOfBytesSent )
+                         if ( SUCCESS == numOfBytesSent || ERROR == numOfBytesSent )
                          {
                              printToLog(logF, ipAddress, "ZERO BYTES SENT");
                              goto rtn;
@@ -1873,7 +1873,7 @@ void * FEfunction(void *clientFdPassed)
                              goto rtn;
                          }
                          numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
-                         if ( SUCCESS == numOfBytesSent )
+                         if ( SUCCESS == numOfBytesSent || ERROR == numOfBytesSent )
                          {
                              printToLog(logF, ipAddress, "ZERO BYTES SENT");
                              goto rtn;
@@ -1913,7 +1913,7 @@ void * FEfunction(void *clientFdPassed)
                              goto rtn;
                          }
                          numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
-                         if ( SUCCESS == numOfBytesSent )
+                         if ( SUCCESS == numOfBytesSent || ERROR == numOfBytesSent )
                          {
                              printToLog(logF, ipAddress, "ZERO BYTES SENT");
                              goto rtn;
@@ -1942,7 +1942,7 @@ void * FEfunction(void *clientFdPassed)
                              goto rtn;
                          }
                          numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
-                         if ( SUCCESS == numOfBytesSent )
+                         if ( SUCCESS == numOfBytesSent || ERROR == numOfBytesSent )
                          {
                              printToLog(logF, ipAddress, "ZERO BYTES SENT");
                              goto rtn;
@@ -1984,7 +1984,7 @@ void * FEfunction(void *clientFdPassed)
                              goto rtn;
                          }
                          numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
-                         if ( SUCCESS == numOfBytesSent )
+                         if ( SUCCESS == numOfBytesSent || ERROR == numOfBytesSent )
                          {
                              printToLog(logF, ipAddress, "ZERO BYTES SENT");
                              goto rtn;
@@ -2015,7 +2015,7 @@ void * FEfunction(void *clientFdPassed)
                              goto rtn;
                          }
                          numOfBytesSent = sendTCP(clientFd, retMsg, sizeof(retMsg));
-                         if ( SUCCESS == numOfBytesSent )
+                         if ( SUCCESS == numOfBytesSent || ERROR == numOfBytesSent )
                          {
                              printToLog(logF, ipAddress, "ZERO BYTES SENT");
                              goto rtn;
@@ -2120,7 +2120,7 @@ void * FEfunction(void *clientFdPassed)
 
              // Send the received message to the hashed peer node
              numOfBytesSent = sendTCP(peerSocket, recMsg, LONG_BUF_SZ);
-             if ( SUCCESS == numOfBytesSent )
+             if ( SUCCESS == numOfBytesSent || ERROR == numOfBytesSent )
              {
                  printToLog(logF, ipAddress, "ZERO BYTES SENT");
                  goto rtn;
@@ -2136,7 +2136,7 @@ void * FEfunction(void *clientFdPassed)
  
              // Send a message back to the local client
              numOfBytesSent = sendTCP(newClientSd, response, LONG_BUF_SZ);
-             if ( SUCCESS == numOfBytesSent )
+             if ( SUCCESS == numOfBytesSent || ERROR == numOfBytesSent )
              {
                  printToLog(logF, ipAddress, "ZERO BYTES SENT");
                  goto rtn;
@@ -2144,15 +2144,14 @@ void * FEfunction(void *clientFdPassed)
 
 	 } // End of else of if ( hash_index == my_hash_index )
 
-
-         printToLog(logF, "SEE HERE", "clientFd closing before the end of the loop");
-         close(clientFd);
-         printToLog(logF, "SEE HERE", "peerSocket closing before the end of the loop");
-         close(peerSocket);
-         free(ptr);
-
   rtn:
+    printToLog(logF, "SEE HERE", "clientFd closing before the end of the loop");
+    close(clientFd);
+    printToLog(logF, "SEE HERE", "peerSocket closing before the end of the loop");
+    close(peerSocket);
+    free(ptr); 
     funcExit(logF, "THREAD FUNCTON EXIT", "FEfunction", 0);
+
 } // End of FEfunction()
 
 
@@ -2525,7 +2524,7 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
 
          // Send the replication message to the peer node
          numOfBytesSent = sendTCP(replicaSocket, replicationMsgToSend, LONG_BUF_SZ);
-         if ( SUCCESS == numOfBytesSent )
+         if ( SUCCESS == numOfBytesSent || ERROR == numOfBytesSent )
          {
              printToLog(logF, ipAddress, "ZERO BYTES SENT"); 
              close(replicaSocket);

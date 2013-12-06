@@ -247,7 +247,7 @@ int delete_replica_from_friends(gpointer key, gpointer value, int chosenOwner)
     append_time_consistency_level(-1, 0, deleteMsg);
  
     numOfBytesSent = sendTCP(friend1Socket, deleteMsg, sizeof(deleteMsg));
-    if ( 0 == numOfBytesSent )
+    if ( 0 == numOfBytesSent || -1 == numOfBytesSent )
     {
         printToLog(logF, ipAddress, "ZERO BYTES SENT TO FRIEND1 WHILE DELETING REPLICA DURING LEAVE");
         rc = -1;
@@ -327,7 +327,7 @@ int delete_replica_from_friends(gpointer key, gpointer value, int chosenOwner)
                append_time_consistency_level(-1, 0, deleteMsg);
 
                numOfBytesSent = sendTCP(friend2Socket, deleteMsg, sizeof(deleteMsg));
-               if ( 0 == numOfBytesSent )
+               if ( 0 == numOfBytesSent || -1 == numOfBytesSent )
                {
                    printToLog(logF, ipAddress, "ZERO BYTES SENT TO FRIEND2 WHILE DELETING REPLICA DURING LEAVE");
                    rc = -1;
@@ -433,7 +433,7 @@ int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy)
 
                printToLog(logF, ipAddress, "Sending INSERT MESSAGE TO PEER NODE BEFORE LEAVING");
                int numOfBytesSent = sendTCP(sd, message, sizeof(message));
-               if ( 0 == numOfBytesSent )
+               if ( 0 == numOfBytesSent || -1 == numOfBytesSent )
                {
                    printf("\nZERO BYTES SENT IN prepare_system_for_leave\n");
                    rc = 0;
@@ -621,7 +621,7 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
             printToLog(logF, "p_k_v", "Connect successful");
 
             int numOfBytesSent = sendTCP(sd, message, sizeof(message));
-            if ( 0 == numOfBytesSent )
+            if ( 0 == numOfBytesSent || -1 == numOfBytesSent )
             {
                printf("\nZERO BYTES SENT IN prepare_system_for_leave\n");
                goto rtn;
@@ -912,7 +912,7 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
                 }
 
                 int numOfBytesSent = sendTCP(sd, message, sizeof(message));
-                if ( 0 == numOfBytesSent )
+                if ( 0 == numOfBytesSent || -1 == numOfBytesSent )
                 {
                     printf("\nZERO BYTES SENT IN prepare_system_for_leave\n");
                     goto rtn;
