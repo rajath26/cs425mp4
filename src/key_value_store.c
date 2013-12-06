@@ -969,7 +969,7 @@ void iterate_hash_table(){
 //         pthread_mutex_lock(&key_value_mutex);
          guint size = g_hash_table_size(key_value_store);
          printf("\nHASH TABLE SIZE: %d\n", (int)size);
-         g_hash_table_foreach(key_value_store,print_key_value,NULL);
+         //g_hash_table_foreach(key_value_store,print_key_value,NULL);
 //         pthread_mutex_unlock(&key_value_mutex);
          funcExit(logF,NULL,"iterate_hash_table",0);
 }
