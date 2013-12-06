@@ -256,7 +256,7 @@ int delete_replica_from_friends(gpointer key, gpointer value, int chosenOwner)
     }
 
     int numOfBytesRec = recvTCP(friend1Socket, deleteResponse, sizeof(deleteResponse));
-    if ( 0 == numOfBytesRec )
+    if ( 0 == numOfBytesRec || -1 == numOfBytesRec )
     {
         printToLog(logF, ipAddress, "ZERO BYTES RECEIVED FROM FRIEND1 WHILE DELETING REPLICA DURING LEAVE");
         rc = -1;
@@ -336,7 +336,7 @@ int delete_replica_from_friends(gpointer key, gpointer value, int chosenOwner)
                }
 
                numOfBytesRec = recvTCP(friend2Socket, deleteResponse, sizeof(deleteResponse));
-               if ( 0 == numOfBytesRec )
+               if ( 0 == numOfBytesRec || -1 == numOfBytesRec )
                {
                    printToLog(logF, ipAddress, "ZERO BYTES RECEIVED FROM FRIEND2 WHILE DELETING REPLICA DURING LEAVE");
                    rc = -1;
@@ -441,7 +441,7 @@ int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy)
                }
 
                int numOfBytesRec = recvTCP(sd, response, 4096);
-               if ( 0 == numOfBytesRec )
+               if ( 0 == numOfBytesRec || -1 == numOfBytesRec )
                {
                    printf("\nZERO BYTES RECEIVED IN prepare_system_for_leave\n");
                    rc = 0;
@@ -630,7 +630,7 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
             printToLog(logF, "p_k_v", "Send successful");
 
             int numOfBytesRec = recvTCP(sd, response, 4096);
-            if ( 0 == numOfBytesRec )
+            if ( 0 == numOfBytesRec || -1 == numOfBytesRec )
             {
                printf("\nZERO BYTES RECEIVED IN prepare_system_for_leave\n");
                goto rtn;
@@ -919,7 +919,7 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
                 }
 
                 int numOfBytesRec = recvTCP(sd, response, 4096);
-                if ( 0 == numOfBytesRec )
+                if ( 0 == numOfBytesRec || -1 == numOfBytesRec )
                 {
                    printf("\nZERO BYTES RECEIVED IN prepare_system_for_leave\n");
                    goto rtn;

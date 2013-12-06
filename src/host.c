@@ -1053,7 +1053,7 @@ void * FEfunction(void *clientFdPassed)
 	 // Receive TCP message 
 	 numOfBytesRec = recvTCP(clientFd, recMsg, LONG_BUF_SZ);
 	 // Check if 0 bytes is received 
-	 if ( SUCCESS == numOfBytesRec )
+	 if ( SUCCESS == numOfBytesRec || ERROR == numOfBytesRec )
 	 {
              sprintf(logMsg, "Number of bytes received is ZERO = %d", numOfBytesRec);
 	     printf("\n%s\n", logMsg);
@@ -2128,7 +2128,7 @@ void * FEfunction(void *clientFdPassed)
 
              // Get the response back from peer node 
              numOfBytesRec = recvTCP(peerSocket, response, LONG_BUF_SZ);
-             if ( SUCCESS == numOfBytesRec )
+             if ( SUCCESS == numOfBytesRec || numOfBytesRec == ERROR )
              {
                  printToLog(logF, ipAddress, "ZERO BYTES RECEIVED");
                  goto rtn;
@@ -2534,7 +2534,7 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
 
          // Get the response back from the peer node 
          numOfBytesRec = recvTCP(replicaSocket, response, LONG_BUF_SZ);
-         if ( SUCCESS == numOfBytesRec )
+         if ( SUCCESS == numOfBytesRec || ERROR == numOfBytesRec )
          {
              printToLog(logF, ipAddress, "ZERO BYTES RECEIVED");
              close(replicaSocket);
