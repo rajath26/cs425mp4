@@ -556,6 +556,8 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
     struct op_code* temp = (struct op_code *) malloc(sizeof(struct op_code));
     int tempAck;
 
+    sprintf(logMsg, "choose hb_index ret i %d; Port : %s; IP : %s", i, hb_table[i].port, hb_table[i].IP);
+    printToLog(logF, "p_k_v choose_hb_index", logMsg);
     strcpy(port,hb_table[i].port);
     strcpy(IP,hb_table[i].IP);
           
@@ -587,7 +589,7 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
             // 2i) Send it to rehashed peer node
             memset(message, '\0', 4096);
             create_message_INSERT(atoi((char *)key),((struct value_group *)value)->value,message);
-            sprintf(logMsg, "PORT: %s, IP : %s , message: %s", hb_table[host_no].port, hb_table[host_no].port, message);
+            sprintf(logMsg, "PORT: %s, IP : %s , message: %s", hb_table[i].port, hb_table[i].IP, message);
             printToLog(logF, "PROCESS_KEY_VALUE", logMsg);
             append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,message);         
             append_time_consistency_level(-1, 0, message);
@@ -598,11 +600,13 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
                 printf("\nUnable to open socket in prepare_system_for_leave\n");
                 goto rtn;
             }
+
+            printToLog(logF, "p_k_v", "Socket successful");
             
             memset(&peer, 0, sizeof(struct sockaddr_in));
             peer.sin_family = AF_INET;
-            peer.sin_port = htons(atoi(port));
-            peer.sin_addr.s_addr = inet_addr(IP);
+            peer.sin_port = htons(atoi(hb_table[i].port));
+            peer.sin_addr.s_addr = inet_addr(hb_table[i].IP);
             memset(&(peer.sin_zero), '\0', 8);
 
             i_rc = connect(sd, (struct sockaddr *) &peer, sizeof(peer));
@@ -612,6 +616,8 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
                goto rtn;
             }
 
+            printToLog(logF, "p_k_v", "Connect successful");
+
             int numOfBytesSent = sendTCP(sd, message, sizeof(message));
             if ( 0 == numOfBytesSent )
             {
@@ -619,12 +625,16 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
                goto rtn;
             }
 
+            printToLog(logF, "p_k_v", "Send successful");
+
             int numOfBytesRec = recvTCP(sd, response, 4096);
             if ( 0 == numOfBytesRec )
             {
                printf("\nZERO BYTES RECEIVED IN prepare_system_for_leave\n");
                goto rtn;
             }
+
+            printToLog(logF, "p_k_v", "Receive Successful in HEREE HEREHEREE ");
 
             // 2ii) Delete from the KV store
             //delete_key_value_from_store(atoi((char *)key));
@@ -771,6 +781,10 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
                         printToLog(logF, ipAddress, "One or both of my friends had died and I tried to replicate and that also failed :(");
                         printToLog(logF, ipAddress, "Not a hard stop continue");
                     }       
+ 
+                    printToLog(logF, "p_k_v", "Updating my current entry");
+                    update_key_value_in_store(&temp);
+
                 } // End of else of if (!bothFriendsDead)
             } // End of else
         } // End of else of if (i != host_no)
@@ -789,14 +803,24 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
             int hisFriends[2];
             printToLog(logF, ipAddress, "Owner of this entry alive. SO check his friends as of now and update local entry");
             chooseFriendsForHim(hisFriends, ((struct value_group*)value)->owner);
-            struct op_code update;
-            update.key = atoi((char *)key);
-            update.value = ((struct value_group *)value)->value;
-            update.owner = ((struct value_group *)value)->owner;
-            update.friend1 = hisFriends[0];
-            update.friend2 = hisFriends[1];
+            // Check if you are in the new friends list of him
+            if ( my_hash_value == hisFriends[0] || my_hash_value == hisFriends[1] )
+            {
+                printToLog(logF, "p_k_v", "I am in his new friends list so update");
+                struct op_code update;
+                update.key = atoi((char *)key);
+                update.value = ((struct value_group *)value)->value;
+                update.owner = ((struct value_group *)value)->owner;
+                update.friend1 = hisFriends[0];
+                update.friend2 = hisFriends[1];
  
-            update_key_value_in_store(&update);
+                update_key_value_in_store(&update);
+            }
+            else
+            {
+                printToLog(logF, "p_k_v", "I am not in hisFriends list anymore hence delete this entry");
+                delete_key_value_from_store(atoi((char *)key));
+            }
         }
         else
         {
