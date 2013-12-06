@@ -813,19 +813,19 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
 
         if(isOwnerAlive(value))
         {
-            int hisFriends[2];
+            //int hisFriends[2];
             printToLog(logF, ipAddress, "Owner of this entry alive. SO check his friends as of now and update local entry");
-            chooseFriendsForHim(hisFriends, ((struct value_group*)value)->owner);
+            chooseFriendsForHim(friendList, ((struct value_group*)value)->owner);
             // Check if you are in the new friends list of him
-            if ( my_hash_value == hisFriends[0] || my_hash_value == hisFriends[1] )
+            if ( my_hash_value == friendList[0] || my_hash_value == friendList[1] )
             {
                 printToLog(logF, "p_k_v", "I am in his new friends list so update");
                 struct op_code update;
                 update.key = atoi((char *)key);
                 update.value = ((struct value_group *)value)->value;
                 update.owner = ((struct value_group *)value)->owner;
-                update.friend1 = hisFriends[0];
-                update.friend2 = hisFriends[1];
+                update.friend1 = friendList[0];
+                update.friend2 = friendList[1];
  
                 update_key_value_in_store(&update);
             }
