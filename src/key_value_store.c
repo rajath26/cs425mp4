@@ -1013,6 +1013,7 @@ int insert_key_value_into_store(struct op_code* op_instance){
      funcEntry(logF,NULL,"insert_key_value_into_store");  
      pthread_mutex_lock(&key_value_mutex);
      char *buffer;
+     char existingBuffer[8096];
      buffer = (char*)malloc(200);
      sprintf(buffer,"%d",op_instance->key);
 
@@ -1032,8 +1033,25 @@ struct value_group{
              int friend2;
 };
 */
+
+    char *existingValue = lookup_store_for_key(atoi(buffer)); 
+    if ( NULL != existingValue ) 
+    {
+
+        strcpy(existingBuffer, existingValue);
+        sprintf(existingBuffer, ";%s;", op_instance->value);
+        free(existingValue);
+        free(op_instance->value);
+        op_instance->value = (char *) malloc(sizeof(existingBuffer));
+        strcpy(op_instance->value, existingBuffer);
+  
+    }
+
     struct value_group* value_obj = (struct value_group *)malloc(sizeof(struct value_group));
-    value_obj->value = op_instance->value;
+    if ( NULL == existingValue )
+        value_obj->value = op_instance->value;
+    else 
+    
     value_obj->timestamp = op_instance->timeStamp;
     value_obj->owner = op_instance->owner;
     value_obj->friend1 = op_instance->friend1;
