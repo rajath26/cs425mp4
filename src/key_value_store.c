@@ -1294,19 +1294,20 @@ int extract_message_op(char *message, struct op_code** instance){
                    funcEntry(logF,NULL,"extract_message_op");
                    char original[512];
 	        //   char *original = (char *)malloc(strlen(message));
-
+                   printToLog(logF,"printing message in extract_message",message);
                    if(strlen(message)==0){
                            printToLog(logF,"null message received","in extract_message");
                            return -1;
                    }
 
                    strcpy(original,message);
-
+                   printToLog(logF,"extract_message_op: original",original);
                    // first extract the first part and then the second (port and the ip)
 
                //    char *another_copy = (char *)malloc(strlen(message));
                    char another_copy[512];
                    strcpy(another_copy,message);
+                   printToLog(logF,"checking another copy, extract_message",another_copy);
 
                    char delim_temp[5]=";";
                    char *token1 = strtok(another_copy,delim_temp); // extract the first part
