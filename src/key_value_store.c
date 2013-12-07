@@ -1041,7 +1041,7 @@ struct value_group{
         existingValue = g_hash_table_lookup(key_value_store,buffer);        
        // pthread_mutex_lock(&key_value_mutex);
     }
-    if ( NULL != existingValue && ((struct value_group *)existingValue)->value!=NULL ) 
+  /*  if ( NULL != existingValue && ((struct value_group *)existingValue)->value!=NULL ) 
     {
         strcpy(existingBuffer, existingValue->value);
         strcat(existingBuffer, "#");
@@ -1051,6 +1051,12 @@ struct value_group{
         free(existingValue);
         op_instance->value = (char *) malloc(strlen(existingBuffer));
         strcpy(op_instance->value, existingBuffer);
+    }*/
+
+    if ( existingValue != NULL && (((struct value_group *)existingValue)->value) != NULL )
+    {
+         sprintf(existingBuffer, "#%s#%s", existingValue->value, op_instance->value);
+         op_instance->value = realloc(op_instance->value, strlen(existingBuffer));
     }
 
     struct value_group* value_obj = (struct value_group *)malloc(sizeof(struct value_group));
