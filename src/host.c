@@ -1024,7 +1024,7 @@ void * FEfunction(void *clientFdPassed)
 
     register int counter;
 
-    char recMsg[LONG_BUF_SZ],
+    char recMsg[LONG_BUF_SZ] = " ",
          retMsg[LONG_BUF_SZ],
          * lookupValue;
 
