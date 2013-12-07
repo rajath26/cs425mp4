@@ -1294,6 +1294,12 @@ int extract_message_op(char *message, struct op_code** instance){
                    funcEntry(logF,NULL,"extract_message_op");
                    char original[512];
 	        //   char *original = (char *)malloc(strlen(message));
+
+                   if(message=NULL){
+                           printToLog(logF,"null message received","in extract_message");
+                           return -1;
+                   }
+
                    strcpy(original,message);
 
                    // first extract the first part and then the second (port and the ip)
