@@ -1057,6 +1057,7 @@ struct value_group{
     {
          sprintf(existingBuffer, "#%s#%s", existingValue->value, op_instance->value);
          op_instance->value = realloc(op_instance->value, strlen(existingBuffer));
+         strcpy(op_instance->value, existingBuffer);
     }
 
     struct value_group* value_obj = (struct value_group *)malloc(sizeof(struct value_group));
