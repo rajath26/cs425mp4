@@ -769,26 +769,36 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
 
                     printToLog(logF, "p_k_v", "Both friends dead");
 
-                    struct op_code *temp1;
-                    char inMsg[4096];
+                    struct op_code temp1;
+                    //char inMsg[4096];
                     int myF[2];
 
-                    create_message_INSERT(atoi((char *)key), ((struct value_group *)value)->value, inMsg);
-                    append_port_ip_to_message(hb_table[host_no].port, hb_table[host_no].IP, inMsg);
-                    append_time_consistency_level(-1, 0, inMsg);
+                    //create_message_INSERT(atoi((char *)key), ((struct value_group *)value)->value, inMsg);
+                    //append_port_ip_to_message(hb_table[host_no].port, hb_table[host_no].IP, inMsg);
+                    //append_time_consistency_level(-1, 0, inMsg);
 
-                    extract_message_op(inMsg, &temp);
+                    //int i_temp = extract_message_op(inMsg, &temp);
+                    //if ( -1 == i_temp )
+                        //goto rtn;
+                    
+                    temp1.opcode = 1;
+                    temp1.key = atoi((char *)key);
+                    temp1.value = ((struct value_group *)value)->value;
+                    strcpy(temp1.port, hb_table[host_no].port);
+                    strcpy(temp1.IP, hb_table[host_no].IP);
+                    temp1.timeStamp = 0;
+                    temp1.cons_level = 0;
 
                     chooseFriendsForReplication(myF);
-
-                    temp1->owner = my_hash_value;
-                    temp1->friend1 = myF[0];
-                    temp1->friend2 = myF[1];
+                    
+                    temp1.owner = my_hash_value;
+                    temp1.friend1 = myF[0];
+                    temp1.friend2 = myF[1];
 
                     // TO DO load time stamp
                 
                     // 3ii) If your friends are not alive then re-replicate
-                    tempAck = replicateKV(temp1, myF);
+                    tempAck = replicateKV(&temp1, myF);
                     if (2 != tempAck)
                     {
                         printToLog(logF, ipAddress, "One or both of my friends had died and I tried to replicate and that also failed :(");

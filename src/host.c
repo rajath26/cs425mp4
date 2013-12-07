@@ -2302,7 +2302,7 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
 
     struct sockaddr_in replicaNode;            // Replica Address
 
-    struct op_code *temp;
+    struct op_code *temp = NULL;
 
     for ( counter = 0; counter < NUM_OF_FRIENDS; counter++)
     {
