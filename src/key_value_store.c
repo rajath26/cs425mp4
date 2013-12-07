@@ -1039,19 +1039,17 @@ struct value_group{
     {
 
         strcpy(existingBuffer, existingValue);
-        sprintf(existingBuffer, ";%s;", op_instance->value);
+        strcat(existingBuffer, ";");
+        strcat(existingBuffer, op_instance->value);
         free(existingValue);
         free(op_instance->value);
-        op_instance->value = (char *) malloc(sizeof(existingBuffer));
+        op_instance->value = (char *) malloc(strlen(existingBuffer));
         strcpy(op_instance->value, existingBuffer);
   
     }
 
     struct value_group* value_obj = (struct value_group *)malloc(sizeof(struct value_group));
-    if ( NULL == existingValue )
-        value_obj->value = op_instance->value;
-    else 
-    
+    value_obj->value = op_instance->value;
     value_obj->timestamp = op_instance->timeStamp;
     value_obj->owner = op_instance->owner;
     value_obj->friend1 = op_instance->friend1;
