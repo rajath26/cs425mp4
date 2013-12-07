@@ -1034,7 +1034,9 @@ struct value_group{
 };
 */
 
+    pthread_mutex_unlock(&key_value_mutex);
     char *existingValue = lookup_store_for_key(op_instance->key); 
+    pthread_mutex_lock(&key_value_mutex);
     if ( NULL != existingValue ) 
     {
 
