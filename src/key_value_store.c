@@ -1017,6 +1017,8 @@ int insert_key_value_into_store(struct op_code* op_instance){
      buffer = (char*)malloc(200);
      sprintf(buffer,"%d",op_instance->key);
      struct value_group* existingValue = NULL;
+ 
+     memset(existingBuffer, '\0', 4096);
 
      /*char* value_old = lookup_store_for_key(op_instance->key);
      if(value_old){
@@ -1049,6 +1051,8 @@ struct value_group{
       //  free(existingValue);
         g_hash_table_remove(key_value_store,key);
         free(existingValue);
+        sprintf(logMsg, "%d", (int)strlen(existingBuffer));
+        printToLog(logF, "NODAPPA", logMsg);
         op_instance->value = (char *) malloc(strlen(existingBuffer));
         strcpy(op_instance->value, existingBuffer);
     }
