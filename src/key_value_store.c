@@ -1034,7 +1034,7 @@ struct value_group{
 };
 */
 
-    char *existingValue = lookup_store_for_key(atoi(buffer)); 
+    char *existingValue = lookup_store_for_key(op_instance->key); 
     if ( NULL != existingValue ) 
     {
 
@@ -1072,6 +1072,7 @@ char* lookup_store_for_key(int key){
      gpointer value;
      char *buffer = (char *)malloc(200);
      sprintf(buffer,"%d",key);
+     printToLog(logF, "RECEIVED KEY TO CHECK : %s", buffer);
      gpointer key_temp = (gpointer)buffer;
      value = g_hash_table_lookup(key_value_store,key_temp);
 
