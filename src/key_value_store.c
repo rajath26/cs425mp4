@@ -1332,8 +1332,14 @@ int extract_message_op(char *message, struct op_code** instance){
              //      strcpy(port,token3);
 
                    *instance = (struct op_code *)malloc(sizeof(struct op_code));    
-               
+                   
+                   if(*instance == NULL){
+                           printToLog(logF,"malloc failed in","extract_message");
+                           return -1;  
+                   }
+                           
                    memset(*instance,0,sizeof(struct op_code));                 
+             
 
                    strcpy((*instance)->port,port);
                    strcpy((*instance)->IP,IP); 
