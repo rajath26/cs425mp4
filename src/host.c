@@ -2195,7 +2195,11 @@ int localKVReorderFunc()
         {
             printToLog(logF, "REORGANIZING KV STORE", "REORG");
             reorganize_key_value_store();
+            reOrderTrigger = 0;
         }
+
+        // Setting 
+        reOrderTrigger = 0;
 
     } // End of while(1)
 
