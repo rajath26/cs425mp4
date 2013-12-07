@@ -65,12 +65,14 @@ int update_host_list()
    int j = 0;
    int i = 0;
    // copy the hash id and index
+   pthread_mutex_lock(&table_mutex);
    for(i=0;i<MAX_HOSTS;i++){
             if(hb_table[i].valid && hb_table[i].status){
                         int val = atoi(hb_table[i].host_id);
                         g_array_append_val(member_list, val);
             }
    }             
+   pthread_mutex_unlock(&table_mutex);
    g_array_sort(member_list,(GCompareFunc)my_int_sort_function);
  //  pthread_mutex_unlock(&members_mutex);
    funcExit(logF,NULL,"update_host_list",0);
@@ -141,12 +143,14 @@ int chooseFriendsForReplication(int *ptr)
    int i = 0;
    int hash_value = my_hash_value;
    // copy the hash id and index
+   pthread_mutex_lock(&table_mutex);
    for(i=0;i<MAX_HOSTS;i++){
             if(hb_table[i].valid && hb_table[i].status){
                         int val = atoi(hb_table[i].host_id);
                         g_array_append_val(member_list, val);
             }
    }
+   pthread_mutex_unlock(&table_mutex);
    g_array_sort(member_list,(GCompareFunc)my_int_sort_function);
    
    int *a = (int *)malloc(sizeof(int)*(member_list->len));
@@ -218,12 +222,15 @@ int chooseFriendsForHim(int *ptr, int hisHashValue)
    int i = 0;
    int hash_value = hisHashValue;
    // copy the hash id and index
+   
+   pthread_mutex_lock(&table_mutex);
    for(i=0;i<MAX_HOSTS;i++){
             if(hb_table[i].valid && hb_table[i].status){
                         int val = atoi(hb_table[i].host_id);
                         g_array_append_val(member_list, val);
             }
    }
+   pthread_mutex_unlock(&table_mutex);
    g_array_sort(member_list,(GCompareFunc)my_int_sort_function);
    
    int a[member_list->len];
@@ -293,6 +300,7 @@ int choose_host_hb_index(int key)
  //   int a[member_list->len];
 //    pthread_mutex_lock(&members_mutex); 
  //   pthread_mutex_lock(&table_mutex);
+    pthread_mutex_lock(&table_mutex);
     member_list = g_array_new(FALSE,FALSE,sizeof(int));
     for(i=0;i<MAX_HOSTS;i++){
             if(hb_table[i].valid && hb_table[i].status){
@@ -300,6 +308,7 @@ int choose_host_hb_index(int key)
                         g_array_append_val(member_list, val);
             }
    }
+   pthread_mutex_unlock(&table_mutex);
    g_array_sort(member_list,(GCompareFunc)my_int_sort_function);
 
     int a[member_list->len];
