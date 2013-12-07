@@ -1087,7 +1087,10 @@ char* lookup_store_for_key(int key){
      value = g_hash_table_lookup(key_value_store,key_temp);
 
      if(value == NULL)
+     {
+       pthread_mutex_unlock(&key_value_mutex);
        return NULL;
+     }
 
      free(buffer);
      pthread_mutex_unlock(&key_value_mutex);
@@ -1147,6 +1150,7 @@ int delete_key_value_from_store(int key){
           pthread_mutex_unlock(&key_value_mutex);
           return -1; //failure
     }
+    pthread_mutex_unlock(&key_value_mutex);
 }
 int append_time_consistency_level(unsigned int timestamp, int consistency_level, char *message){
                    funcEntry(logF,NULL,"append_time_consistency_level");
