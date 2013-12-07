@@ -1295,7 +1295,7 @@ int extract_message_op(char *message, struct op_code** instance){
                    char original[512];
 	        //   char *original = (char *)malloc(strlen(message));
 
-                   if(message=NULL){
+                   if(message==NULL){
                            printToLog(logF,"null message received","in extract_message");
                            return -1;
                    }
