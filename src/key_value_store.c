@@ -1011,12 +1011,12 @@ char* lookup_store_for_key(int key);
 int insert_key_value_into_store(struct op_code* op_instance){
    
      funcEntry(logF,NULL,"insert_key_value_into_store");  
-     //pthread_mutex_lock(&key_value_mutex);
+     pthread_mutex_lock(&key_value_mutex);
      char *buffer;
      char existingBuffer[8096];
      buffer = (char*)malloc(200);
      sprintf(buffer,"%d",op_instance->key);
-     char *existingValue = NULL;
+     struct value_group* existingValue = NULL;
 
      /*char* value_old = lookup_store_for_key(op_instance->key);
      if(value_old){
@@ -1038,20 +1038,19 @@ struct value_group{
     if ( (int)m )
     {
         //pthread_mutex_unlock(&key_value_mutex);
-        existingValue = lookup_store_for_key(op_instance->key); 
+        existingValue = g_hash_table_lookup(key_value_store,buffer);        
        // pthread_mutex_lock(&key_value_mutex);
     }
-    if ( NULL != existingValue ) 
+    if ( NULL != existingValue && ((struct value_group *)existingValue)->value!=NULL ) 
     {
-
-        strcpy(existingBuffer, existingValue);
+        strcpy(existingBuffer, existingValue->value);
         strcat(existingBuffer, "#");
         strcat(existingBuffer, op_instance->value);
+      //  free(existingValue);
+        g_hash_table_remove(key_value_store,key);
         free(existingValue);
-        free(op_instance->value);
         op_instance->value = (char *) malloc(strlen(existingBuffer));
         strcpy(op_instance->value, existingBuffer);
-  
     }
 
     struct value_group* value_obj = (struct value_group *)malloc(sizeof(struct value_group));
@@ -1065,14 +1064,14 @@ struct value_group{
      gpointer value = (gpointer)value_obj;
 
      g_hash_table_replace(key_value_store,key,value);
-     //pthread_mutex_unlock(&key_value_mutex);
+     pthread_mutex_unlock(&key_value_mutex);
      funcExit(logF,NULL,"insert_key_value_into_store",0);
 }
 
 char* lookup_store_for_key(int key){
     
      funcEntry(logF,NULL,"lookup_store_for_key");
-     //pthread_mutex_lock(&key_value_mutex);
+     pthread_mutex_lock(&key_value_mutex);
      gpointer value;
      char *buffer = (char *)malloc(200);
      sprintf(buffer,"%d",key);
@@ -1084,7 +1083,7 @@ char* lookup_store_for_key(int key){
        return NULL;
 
      free(buffer);
-     //pthread_mutex_unlock(&key_value_mutex);
+     pthread_mutex_unlock(&key_value_mutex);
      funcExit(logF,NULL,"lookup_store_for_key",0);
      return ((struct value_group *)value)->value;
 }
