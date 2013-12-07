@@ -806,7 +806,7 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
                     }       
  
                     printToLog(logF, "p_k_v", "Updating my current entry");
-                    update_key_value_in_store(&temp);
+                    update_key_value_in_store(&temp1);
 
                 } // End of else of if (!bothFriendsDead)
             } // End of else
@@ -1056,6 +1056,10 @@ char* lookup_store_for_key(int key){
      sprintf(buffer,"%d",key);
      gpointer key_temp = (gpointer)buffer;
      value = g_hash_table_lookup(key_value_store,key_temp);
+
+     if(value == NULL)
+       return NULL;
+
      free(buffer);
      pthread_mutex_unlock(&key_value_mutex);
      funcExit(logF,NULL,"lookup_store_for_key",0);
@@ -1066,8 +1070,10 @@ int update_key_value_in_store(struct op_code *op_instance)
 {
     funcEntry(logF, NULL, "update_key_value_into_store");
     int rc = 0,i_rc;
+    if(op_instance == NULL)
+        return -1;
     char* lookupValue = lookup_store_for_key(op_instance->key);
-    if ( NULL == lookupValue ) {
+    if ( NULL == lookupValue) {
         rc = -1;
         goto rtn;
     }
