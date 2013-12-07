@@ -1045,7 +1045,7 @@ struct value_group{
     {
 
         strcpy(existingBuffer, existingValue);
-        strcat(existingBuffer, ";");
+        strcat(existingBuffer, "#");
         strcat(existingBuffer, op_instance->value);
         free(existingValue);
         free(op_instance->value);
