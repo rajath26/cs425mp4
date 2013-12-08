@@ -46,7 +46,7 @@
 #define NUM_OF_THREADS            2
 #define SMALL_BUF_SZ              100
 #define MED_BUF_SZ                1024
-#define LONG_BUF_SZ               4096
+#define LONG_BUF_SZ               8192 
 #define INSERT_KV                 1
 #define LOOKUP_KV                 4 
 #define UPDATE_KV                 3 

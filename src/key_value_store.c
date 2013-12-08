@@ -145,8 +145,8 @@ int delete_replica_from_friends(gpointer key, gpointer value, int chosenOwner)
         friend2Socket;
     char friend1IP[25];
     char friend2IP[25]; 
-    char deleteMsg[4096];
-    char deleteResponse[4096];
+    char deleteMsg[8192];
+    char deleteResponse[8192];
     struct sockaddr_in friend1Addr;
     int numOfBytesSent;
     int hisFriendList[2];
@@ -266,8 +266,8 @@ int delete_replica_from_friends(gpointer key, gpointer value, int chosenOwner)
 
     friend2Label:
 
-               memset(deleteMsg, '\0', 4096);
-               memset(deleteResponse, '\0', 4096);
+               memset(deleteMsg, '\0', 8192);
+               memset(deleteResponse, '\0', 8192);
                // Get friend2 hash value in the chord
                friend2 = ((struct value_group *)value)->friend2;
 
@@ -364,12 +364,12 @@ int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy)
          
          char port[20];
          char IP[100];
-         char response[4096];
+         char response[8192];
          int sd;
          int i_rc;
          struct sockaddr_in peer;
          guint m = g_hash_table_size(key_value_store);
-         char message[4096];
+         char message[8192];
 
          if(m!=0)
          {
@@ -393,7 +393,7 @@ int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy)
                int i = choose_host_hb_index(atoi((char*)key));
 
                // 2) Send the insert message to the peer node 
-               memset(message, '\0', 4096);
+               memset(message, '\0', 8192);
                create_message_INSERT_LEAVE(atoi((char *)key),((struct value_group *)value)->value,message);
                append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,message);
                append_time_consistency_level(-1, 0, message);
@@ -440,7 +440,7 @@ int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy)
                    goto rtn;
                }
 
-               int numOfBytesRec = recvTCP(sd, response, 4096);
+               int numOfBytesRec = recvTCP(sd, response, 8192);
                if ( 0 == numOfBytesRec || -1 == numOfBytesRec )
                {
                    printf("\nZERO BYTES RECEIVED IN prepare_system_for_leave\n");
@@ -547,9 +547,9 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
     int sd;
     char port[20];
     char IP[100];
-    char message[4096];
-    char recMsg[4096];
-    char response[4096];
+    char message[8192];
+    char recMsg[8192];
+    char response[8192];
     struct sockaddr_in peer;
     int friendsAlive = 1;
     int friendList[2];
@@ -589,7 +589,7 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
             printToLog(logF, "p_k_v", "Rehashed to someone else so sending the KV to them and attempt delete replicas");
 
             // 2i) Send it to rehashed peer node
-            memset(message, '\0', 4096);
+            memset(message, '\0', 8192);
             create_message_INSERT(atoi((char *)key),((struct value_group *)value)->value,message);
             sprintf(logMsg, "PORT: %s, IP : %s , message: %s", hb_table[i].port, hb_table[i].IP, message);
             printToLog(logF, "PROCESS_KEY_VALUE", logMsg);
@@ -629,7 +629,7 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
 
             printToLog(logF, "p_k_v", "Send successful");
 
-            int numOfBytesRec = recvTCP(sd, response, 4096);
+            int numOfBytesRec = recvTCP(sd, response, 8192);
             if ( 0 == numOfBytesRec || -1 == numOfBytesRec )
             {
                printf("\nZERO BYTES RECEIVED IN prepare_system_for_leave\n");
@@ -714,8 +714,8 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
 
                     int missingPort = atoi(hb_table[missingIndex].port);
                     char missingIP[100];
-                    char repMsg[4096];
-                    char response[4096];
+                    char repMsg[8192];
+                    char response[8192];
                     struct sockaddr_in missingAddr;
                     struct op_code missingOpCode;
                     strcpy(missingIP, hb_table[missingIndex].IP);
@@ -754,9 +754,9 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
                     append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,repMsg);
                     append_time_consistency_level(-1, 0, repMsg);
 
-                    sendTCP(missingSocket, repMsg, 4096);
+                    sendTCP(missingSocket, repMsg, 8192);
  
-                    recvTCP(missingSocket, response, 4096);
+                    recvTCP(missingSocket, response, 8192);
 
                     close(missingSocket);
 
@@ -866,7 +866,7 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
                 printToLog(logF, "p_k_v", "Closest friend dead");
             if ( closestFriend || closestFriendDead )
             {
-                memset(message, '\0', 4096);
+                memset(message, '\0', 8192);
                 create_message_INSERT(atoi((char *)key),((struct value_group *)value)->value,message);
                 sprintf(logMsg, "PORT: %s, IP : %s , message: %s", hb_table[i].port, hb_table[i].IP, message);
                 printToLog(logF, "PROCESS_KEY_VALUE", logMsg);
@@ -928,7 +928,7 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
                     goto rtn;
                 }
 
-                int numOfBytesRec = recvTCP(sd, response, 4096);
+                int numOfBytesRec = recvTCP(sd, response, 8192);
                 if ( 0 == numOfBytesRec || -1 == numOfBytesRec )
                 {
                    printf("\nZERO BYTES RECEIVED IN prepare_system_for_leave\n");
