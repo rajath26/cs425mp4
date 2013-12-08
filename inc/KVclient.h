@@ -66,7 +66,7 @@ char clientIpAddr[SMALL_BUF_SZ];
 char serverPortNo[SMALL_BUF_SZ];
 char KVclientCmd[LONG_BUF_SZ];
 int consistencyLevel;
-int hashedKey;
+unsigned int hashedKey;
 char opCode[SMALL_BUF_SZ];
 char key[SMALL_BUF_SZ];
 char hashedKeyToChar[SMALL_BUF_SZ];

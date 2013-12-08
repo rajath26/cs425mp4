@@ -1013,57 +1013,11 @@ int insert_key_value_into_store(struct op_code* op_instance){
      funcEntry(logF,NULL,"insert_key_value_into_store");  
      pthread_mutex_lock(&key_value_mutex);
      char *buffer;
-     char existingBuffer[8096];
      buffer = (char*)malloc(200);
      sprintf(buffer,"%d",op_instance->key);
-     struct value_group* existingValue = NULL;
  
-     memset(existingBuffer, '\0', 4096);
-
-     /*char* value_old = lookup_store_for_key(op_instance->key);
-     if(value_old){
-          delete_key_value_from_store(op_instance->key);
-      }*/
-
      gpointer key = (gpointer)buffer;
-
-/*
-struct value_group{
-             char *value;
-             int timestamp;
-             int owner;
-             int friend1;
-             int friend2;
-};
-*/
-    /*guint m = g_hash_table_size(key_value_store);
-    if ( (int)m )
-    {
-        //pthread_mutex_unlock(&key_value_mutex);
-        existingValue = g_hash_table_lookup(key_value_store,buffer);        
-       // pthread_mutex_lock(&key_value_mutex);
-    }
-    if ( NULL != existingValue && ((struct value_group *)existingValue)->value!=NULL ) 
-    {
-        strcpy(existingBuffer, existingValue->value);
-        strcat(existingBuffer, "#");
-        strcat(existingBuffer, op_instance->value);
-      //  free(existingValue);
-        g_hash_table_remove(key_value_store,key);
-        free(existingValue);
-        sprintf(logMsg, "%d", (int)strlen(existingBuffer));
-        printToLog(logF, "NODAPPA", logMsg);
-        op_instance->value = (char *) malloc(strlen(existingBuffer));
-        strcpy(op_instance->value, existingBuffer);
-    }*/
-/*
-    if ( existingValue != NULL && (((struct value_group *)existingValue)->value) != NULL )
-    {
-         sprintf(existingBuffer, "#%s#%s", existingValue->value, op_instance->value);
-         op_instance->value = realloc(op_instance->value, strlen(existingBuffer));
-         strcpy(op_instance->value, existingBuffer);
-    }
-*/
+    
     struct value_group* value_obj = (struct value_group *)malloc(sizeof(struct value_group));
     value_obj->value = op_instance->value;
     value_obj->timestamp = op_instance->timeStamp;
@@ -1090,14 +1044,6 @@ char* lookup_store_for_key(int key){
      gpointer key_temp = (gpointer)buffer;
      value = g_hash_table_lookup(key_value_store,key_temp);
 
-     if(value == NULL)
-     {
-       pthread_mutex_unlock(&key_value_mutex);
-       return NULL;
-     }
-
-     free(buffer);
-     pthread_mutex_unlock(&key_value_mutex);
      funcExit(logF,NULL,"lookup_store_for_key",0);
      return ((struct value_group *)value)->value;
 }
