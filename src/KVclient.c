@@ -467,7 +467,7 @@ int parseKVClientCmd()
          strcpy(key, token);
          keySet = 1;
          printf("\nKEY: %s\n", key);
-         hashedKey = g_str_hash(key);
+         hashedKey = (abs(  (g_str_hash(key)) ) % 10000);
          printf("\nHASHED INTEGER KEY: %u\n", hashedKey);
          sprintf(key, "%u", hashedKey);
     }
