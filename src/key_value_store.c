@@ -1036,7 +1036,7 @@ struct value_group{
              int friend2;
 };
 */
-    guint m = g_hash_table_size(key_value_store);
+    /*guint m = g_hash_table_size(key_value_store);
     if ( (int)m )
     {
         //pthread_mutex_unlock(&key_value_mutex);
@@ -1055,7 +1055,7 @@ struct value_group{
         printToLog(logF, "NODAPPA", logMsg);
         op_instance->value = (char *) malloc(strlen(existingBuffer));
         strcpy(op_instance->value, existingBuffer);
-    }
+    }*/
 /*
     if ( existingValue != NULL && (((struct value_group *)existingValue)->value) != NULL )
     {
