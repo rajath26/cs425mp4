@@ -991,7 +991,7 @@ void print_key_value(char *key,char *value){
 int create_hash_table(){
    funcEntry(logF,NULL,"create_hash_table");
    //pthread_mutex_lock(&key_value_mutex);
-   key_value_store =  g_hash_table_new(g_int_hash,g_str_equal);
+   key_value_store =  g_hash_table_new(g_str_hash,g_str_equal);
    if(key_value_store == NULL){
              //pthread_mutex_unlock(&key_value_mutex); 
              funcExit(logF,NULL,"create_hash_table",0);
@@ -1012,12 +1012,11 @@ int insert_key_value_into_store(struct op_code* op_instance){
    
      funcEntry(logF,NULL,"insert_key_value_into_store");  
      pthread_mutex_lock(&key_value_mutex);
-     //char *buffer;
-     //buffer = (char*)malloc(2000);
-     //sprintf(buffer,"%d",op_instance->key);
-     int *ptr = &op_instance->key;
+     char *buffer;
+     buffer = (char*)malloc(2000);
+     sprintf(buffer,"%d",op_instance->key);
  
-     gpointer key = (gpointer)ptr;
+     gpointer key = (gpointer)buffer;
     
     struct value_group* value_obj = (struct value_group *)malloc(sizeof(struct value_group));
     value_obj->value = op_instance->value;
@@ -1039,11 +1038,10 @@ char* lookup_store_for_key(unsigned int key){
      funcEntry(logF,NULL,"lookup_store_for_key");
      pthread_mutex_lock(&key_value_mutex);
      gpointer value;
-     //char buffer[4096];
-     //sprintf(buffer,"%d",key);
-
-     //printToLog(logF, "RECEIVED KEY TO CHECK : %d", key);
-     gpointer key_temp = (gpointer)&key;
+     char buffer[4096];
+     sprintf(buffer,"%d",key);
+     printToLog(logF, "RECEIVED KEY TO CHECK : %s", buffer);
+     gpointer key_temp = (gpointer)buffer;
      value = g_hash_table_lookup(key_value_store,key_temp);
 
      funcExit(logF,NULL,"lookup_store_for_key",0);
@@ -1078,13 +1076,13 @@ int delete_key_value_from_store(unsigned int key){
      funcEntry(logF,NULL,"delete_key_value_from_store");
      pthread_mutex_lock(&key_value_mutex);
      int status;
-     //char buffer[4096];
-     //sprintf(buffer,"%d",key);
+     char buffer[4096];
+     sprintf(buffer,"%d",key);
    
      gpointer value;  // free_code
-     value = g_hash_table_lookup(key_value_store,(gpointer)&key); // free_code
+     value = g_hash_table_lookup(key_value_store,buffer); // free_code
 
-     status = g_hash_table_remove(key_value_store,(gpointer)&key);
+     status = g_hash_table_remove(key_value_store,buffer);
      if(status){
           
           free((struct value_group *)value);   // free_code
