@@ -236,7 +236,7 @@ int delete_replica_from_friends(gpointer key, gpointer value, int chosenOwner)
         goto friend2Label;
     }
 
-    temp1.key = atoi((char *)key);
+    temp1.key = (unsigned)atoi((char *)key);
     temp1.value = NULL;
     temp1.owner = my_hash_value;
     temp1.friend1 = ((struct value_group *)value)->friend1;
@@ -316,7 +316,7 @@ int delete_replica_from_friends(gpointer key, gpointer value, int chosenOwner)
                    goto rtn;
                }
 
-               temp2.key = atoi((char *)key);
+               temp2.key = (unsigned)atoi((char *)key);
                temp2.value = NULL;
                temp2.owner = my_hash_value;
                temp2.friend1 = ((struct value_group *)value)->friend1;
@@ -390,7 +390,7 @@ int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy)
                // 3) delete the replica of this entry
 
                // 1) Re-hash the key
-               int i = choose_host_hb_index(atoi((char*)key));
+               int i = choose_host_hb_index((unsigned)atoi((char*)key));
 
                // 2) Send the insert message to the peer node 
                memset(message, '\0', 8192);
