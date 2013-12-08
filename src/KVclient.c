@@ -468,8 +468,8 @@ int parseKVClientCmd()
          keySet = 1;
          printf("\nKEY: %s\n", key);
          hashedKey = g_str_hash(key);
-         printf("\nHASHED INTEGER KEY: %d\n", hashedKey);
-         sprintf(key, "%d", hashedKey);
+         printf("\nHASHED INTEGER KEY: %u\n", hashedKey);
+         sprintf(key, "%u", hashedKey);
     }
 
     // VALUE 
