@@ -1013,7 +1013,7 @@ int insert_key_value_into_store(struct op_code* op_instance){
      funcEntry(logF,NULL,"insert_key_value_into_store");  
      pthread_mutex_lock(&key_value_mutex);
      char *buffer;
-     buffer = (char*)malloc(200);
+     buffer = (char*)malloc(2000);
      sprintf(buffer,"%d",op_instance->key);
  
      gpointer key = (gpointer)buffer;
@@ -1038,7 +1038,7 @@ char* lookup_store_for_key(int key){
      funcEntry(logF,NULL,"lookup_store_for_key");
      pthread_mutex_lock(&key_value_mutex);
      gpointer value;
-     char *buffer = (char *)malloc(200);
+     char buffer[4096];
      sprintf(buffer,"%d",key);
      printToLog(logF, "RECEIVED KEY TO CHECK : %s", buffer);
      gpointer key_temp = (gpointer)buffer;
@@ -1076,7 +1076,7 @@ int delete_key_value_from_store(int key){
      funcEntry(logF,NULL,"delete_key_value_from_store");
      pthread_mutex_lock(&key_value_mutex);
      int status;
-     char *buffer = (char *)malloc(200);
+     char buffer[4096];
      sprintf(buffer,"%d",key);
    
      gpointer value;  // free_code
@@ -1086,7 +1086,7 @@ int delete_key_value_from_store(int key){
      if(status){
           
           free((struct value_group *)value);   // free_code
-          free(buffer); // free_code
+        //  free(buffer); // free_code
 
           funcExit(logF,NULL,"delete_key_value_from_store",0);
           pthread_mutex_unlock(&key_value_mutex); 
@@ -1094,7 +1094,7 @@ int delete_key_value_from_store(int key){
      }
      else{
 
-          free(buffer);  // free_code
+        //  free(buffer);  // free_code
 
           funcExit(logF,NULL,"delete_key_value_from_store",0);
           pthread_mutex_unlock(&key_value_mutex);
@@ -1104,7 +1104,7 @@ int delete_key_value_from_store(int key){
 }
 int append_time_consistency_level(unsigned int timestamp, int consistency_level, char *message){
                    funcEntry(logF,NULL,"append_time_consistency_level");
-                   char buf[20];
+                   char buf[200];
 
                    if(timestamp==-1){
     			 struct timeval timer;
@@ -1115,7 +1115,7 @@ int append_time_consistency_level(unsigned int timestamp, int consistency_level,
                    sprintf(buf,"%d",timestamp);
                    strcat(message,buf);
                    strcat(message,":");
-                   char buf1[20];
+                   char buf1[200];
                    sprintf(buf1,"%d",consistency_level);
                    strcat(message,buf1);
                    strcat(message,";");
@@ -1291,7 +1291,7 @@ struct op_code{
 int extract_message_op(char *message, struct op_code** instance){
 
                    funcEntry(logF,NULL,"extract_message_op");
-                   char original[512];
+                   char original[4096];
 	        //   char *original = (char *)malloc(strlen(message));
                    printToLog(logF,"printing message in extract_message",message);
                    if(strlen(message)==0){
@@ -1304,14 +1304,14 @@ int extract_message_op(char *message, struct op_code** instance){
                    // first extract the first part and then the second (port and the ip)
 
                //    char *another_copy = (char *)malloc(strlen(message));
-                   char another_copy[512];
+                   char another_copy[4096];
                    strcpy(another_copy,message);
                    printToLog(logF,"checking another copy, extract_message",another_copy);
 
                    char delim_temp[5]=";";
                    char *token1 = strtok(another_copy,delim_temp); // extract the first part
                //    char *token_on = (char *)malloc(strlen(token1));
-                   char token_on[512];
+                   char token_on[4096];
                    strcpy(token_on,token1);                   
 
                    char *token2 = strtok(NULL,delim_temp);  // extract the second part
@@ -1328,11 +1328,11 @@ int extract_message_op(char *message, struct op_code** instance){
                    int conslevelval = atoi(conslevel);
 
                    char *token3 = strtok(ip_port,":");   //extract port from 2nd part
-                   char port[30];
+                   char port[300];
 		   strcpy(port,token3);
 
                    char *token4 = strtok(NULL,":");     //extract IP from 2nd part
-                   char IP[30];                       // store to IP
+                   char IP[300];                       // store to IP
                    strcpy(IP,token4);
              //      char port[30];                     // store to port
              //      strcpy(port,token3);
