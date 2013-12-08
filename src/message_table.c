@@ -286,7 +286,7 @@ int chooseFriendsForHim(int *ptr, int hisHashValue)
 
 
 
-int choose_host_hb_index(int key)
+int choose_host_hb_index(unsigned int key)
 {
     funcEntry(logF,NULL,"choose_host_hb_index");
 

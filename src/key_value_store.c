@@ -394,7 +394,7 @@ int prepare_system_for_leave(gpointer key,gpointer value, gpointer dummy)
 
                // 2) Send the insert message to the peer node 
                memset(message, '\0', 8192);
-               create_message_INSERT_LEAVE(atoi((char *)key),((struct value_group *)value)->value,message);
+               create_message_INSERT_LEAVE((unsigned)atoi((char *)key),((struct value_group *)value)->value,message);
                append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,message);
                append_time_consistency_level(-1, 0, message);
                strcpy(port,hb_table[i].port);
@@ -541,7 +541,7 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
     funcEntry(logF,NULL,"process_key_value");
     int rc = 0;
     update_host_list();
-    int i = choose_host_hb_index(atoi((char*)key));         
+    int i = choose_host_hb_index((unsigned)atoi((char*)key));         
     int i_rc;
     int numOfBytesSent;
     int sd;
@@ -590,7 +590,7 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
 
             // 2i) Send it to rehashed peer node
             memset(message, '\0', 8192);
-            create_message_INSERT(atoi((char *)key),((struct value_group *)value)->value,message);
+            create_message_INSERT((unsigned)atoi((char *)key),((struct value_group *)value)->value,message);
             sprintf(logMsg, "PORT: %s, IP : %s , message: %s", hb_table[i].port, hb_table[i].IP, message);
             printToLog(logF, "PROCESS_KEY_VALUE", logMsg);
             append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,message);         
@@ -730,7 +730,7 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
  
                     connect(missingSocket, (struct sockaddr *) &missingAddr, sizeof(missingAddr));
 
-                    missingOpCode.key = atoi((char *)key);
+                    missingOpCode.key = (unsigned)atoi((char *)key);
                     missingOpCode.value = ((struct value_group *)value)->value;
                     missingOpCode.owner = my_hash_value;
                     if (friend1Missing)
@@ -782,7 +782,7 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
                         //goto rtn;
                     
                     temp1.opcode = 1;
-                    temp1.key = atoi((char *)key);
+                    temp1.key = (unsigned)atoi((char *)key);
                     temp1.value = ((struct value_group *)value)->value;
                     strcpy(temp1.port, hb_table[host_no].port);
                     strcpy(temp1.IP, hb_table[host_no].IP);
@@ -831,7 +831,7 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
             {
                 printToLog(logF, "p_k_v", "I am in his new friends list so update");
                 struct op_code update;
-                update.key = atoi((char *)key);
+                update.key = (unsigned)atoi((char *)key);
                 update.value = ((struct value_group *)value)->value;
                 update.owner = ((struct value_group *)value)->owner;
                 update.friend1 = friendList[0];
@@ -867,7 +867,7 @@ int process_key_value(gpointer key,gpointer value, gpointer dummy)
             if ( closestFriend || closestFriendDead )
             {
                 memset(message, '\0', 8192);
-                create_message_INSERT(atoi((char *)key),((struct value_group *)value)->value,message);
+                create_message_INSERT((unsigned)atoi((char *)key),((struct value_group *)value)->value,message);
                 sprintf(logMsg, "PORT: %s, IP : %s , message: %s", hb_table[i].port, hb_table[i].IP, message);
                 printToLog(logF, "PROCESS_KEY_VALUE", logMsg);
                 append_port_ip_to_message(hb_table[host_no].port,hb_table[host_no].IP,message);         
@@ -1045,6 +1045,7 @@ char* lookup_store_for_key(unsigned int key){
      value = g_hash_table_lookup(key_value_store,key_temp);
 
      funcExit(logF,NULL,"lookup_store_for_key",0);
+     pthread_mutex_unlock(&key_value_mutex);
      return ((struct value_group *)value)->value;
 }
 
