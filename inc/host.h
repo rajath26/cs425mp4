@@ -82,7 +82,7 @@ int tcp;                               // TCP socket descriptor
 struct sockaddr_in hostAddress;        // Host address
 char ipAddress[SMALL_BUF_SZ],          // IP of current host
      portNo[SMALL_BUF_SZ],             // Port no of current host
-     logMsg[MED_BUF_SZ];               // Log message buffer 
+     logMsg[LONG_BUF_SZ];               // Log message buffer 
 bool isLeader = false;                 // Bool variable
 //extern struct hb_entry hb_table[MAX_HOSTS];
 

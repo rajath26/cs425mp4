@@ -46,7 +46,7 @@
 #define NUM_OF_THREADS            2
 #define SMALL_BUF_SZ              100
 #define MED_BUF_SZ                1024
-#define LONG_BUF_SZ               8192 
+#define LONG_BUF_SZ               4096 
 #define INSERT_KV                 1
 #define LOOKUP_KV                 4 
 #define UPDATE_KV                 3 
@@ -68,7 +68,7 @@ char KVclientCmd[LONG_BUF_SZ];
 int consistencyLevel;
 unsigned int hashedKey;
 char opCode[SMALL_BUF_SZ];
-char key[SMALL_BUF_SZ];
+char key[LONG_BUF_SZ];
 char hashedKeyToChar[SMALL_BUF_SZ];
 char value[LONG_BUF_SZ];
 char msgToSend[LONG_BUF_SZ];
