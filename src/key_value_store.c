@@ -18,7 +18,7 @@
 
 struct op_code{
              int opcode;
-             int key;
+             unsigned int key;
              char *value;
              char port[15];
              char IP[40];
@@ -502,7 +502,7 @@ int create_temp_list()
 }
 
 
-int insert_into_temp_list(int key, char *value)
+int insert_into_temp_list(unsigned int key, char *value)
 {
    funcEntry(logF,NULL,"insert_into_temp_list");
    struct op_code* temp = (struct op_code *)malloc(sizeof(struct op_code));  
@@ -1005,7 +1005,7 @@ int create_hash_table(){
 }
 
 
-char* lookup_store_for_key(int key);
+char* lookup_store_for_key(unsigned int key);
 // send an opcode instance which is dynamically allocated
 //
 int insert_key_value_into_store(struct op_code* op_instance){
@@ -1033,7 +1033,7 @@ int insert_key_value_into_store(struct op_code* op_instance){
      funcExit(logF,NULL,"insert_key_value_into_store",0);
 }
 
-char* lookup_store_for_key(int key){
+char* lookup_store_for_key(unsigned int key){
     
      funcEntry(logF,NULL,"lookup_store_for_key");
      pthread_mutex_lock(&key_value_mutex);
@@ -1072,7 +1072,7 @@ int update_key_value_in_store(struct op_code *op_instance)
 } // End of update_key_value_in_store
 
 
-int delete_key_value_from_store(int key){
+int delete_key_value_from_store(unsigned int key){
      funcEntry(logF,NULL,"delete_key_value_from_store");
      pthread_mutex_lock(&key_value_mutex);
      int status;
@@ -1138,7 +1138,7 @@ int append_port_ip_to_message(char *port,char *ip,char *message){
 
 int create_message_REP_INSERT(struct op_code* op, char *message){
 
-                   int key = op->key; 
+                   unsigned int key = op->key; 
                    char *value = op->value; 
                    int origin = op->owner; 
                    int friend1 = op->friend1; 
@@ -1152,7 +1152,7 @@ int create_message_REP_INSERT(struct op_code* op, char *message){
 
 int create_message_REP_DELETE(struct op_code* op,char *message){
 
-                   int key = op->key;
+                   unsigned int key = op->key;
                    char *value = op->value;
                    int origin = op->owner; 
                    int friend1 = op->friend1;
@@ -1166,7 +1166,7 @@ int create_message_REP_DELETE(struct op_code* op,char *message){
 
 int create_message_REP_UPDATE(struct op_code* op, char *message){
 
-                   int key = op->key;
+                   unsigned int key = op->key;
                    char *value = op->value;
                    int origin = op->owner;
                    int friend1 = op->friend1;
@@ -1180,7 +1180,7 @@ int create_message_REP_UPDATE(struct op_code* op, char *message){
 
 int create_message_REP_LOOKUP(struct op_code* op, char *message){
 
-                   int key = op->key;
+                   unsigned int key = op->key;
                    char *value = op->value;
                    int origin = op->owner;
                    int friend1 = op->friend1;
@@ -1193,7 +1193,7 @@ int create_message_REP_LOOKUP(struct op_code* op, char *message){
 }
 
 
-int create_message_INSERT(int key, char *value, char *message){
+int create_message_INSERT(unsigned int key, char *value, char *message){
                    funcEntry(logF,NULL,"create_message_INSERT");
 	           int len = strlen(value);
 	       //    char *buffer = (char *)malloc(300);
@@ -1202,7 +1202,7 @@ int create_message_INSERT(int key, char *value, char *message){
                    funcExit(logF,NULL,"create_message_INSERT",0);
 		   return 0;
 }
-int create_message_INSERT_RESULT_SUCCESS(int key, char *message){
+int create_message_INSERT_RESULT_SUCCESS(unsigned int key, char *message){
                    
                    funcEntry(logF,NULL,"create_message_RESULT_SUCCESS");
                 //   char *buffer = (char *)malloc(300);
@@ -1211,7 +1211,7 @@ int create_message_INSERT_RESULT_SUCCESS(int key, char *message){
                    funcExit(logF,NULL,"create_message_RESULT_SUCCESS",0);
                    return 0;
 }
-int create_message_DELETE(int key, char *message){
+int create_message_DELETE(unsigned int key, char *message){
                    funcEntry(logF,NULL,"create_message_DELETE");
 	        //   char *buffer = (char *)malloc(300);
 	           sprintf(message,"DELETE:%d;",key);
@@ -1219,7 +1219,7 @@ int create_message_DELETE(int key, char *message){
                    funcExit(logF,NULL,"create_message_DELETE",0);
 		   return 0;
 }
-int create_message_DELETE_RESULT_SUCCESS(int key, char *message){
+int create_message_DELETE_RESULT_SUCCESS(unsigned int key, char *message){
                    funcEntry(logF,NULL,"create_message_DELETE_RESULT_SUCCESS");
               //     char *buffer = (char *)malloc(300);
                    sprintf(message,"DELETE_RESULT_SUCCESS:%d;",key);
@@ -1227,7 +1227,7 @@ int create_message_DELETE_RESULT_SUCCESS(int key, char *message){
                    funcExit(logF,NULL,"create_message_DELETE_RESULT_SUCCESS",0);
                    return 0;
 }
-int create_message_UPDATE(int key, char *value, char *message){
+int create_message_UPDATE(unsigned int key, char *value, char *message){
                    funcEntry(logF,NULL,"create_message_UPDATE");
 	      //     int len = strlen(value);
 	       //    char *buffer = (char *)malloc(len+20+100);
@@ -1236,7 +1236,7 @@ int create_message_UPDATE(int key, char *value, char *message){
                    funcExit(logF,NULL,"create_message_UPDATE",0);
 		   return 0;
 }
-int create_message_UPDATE_RESULT_SUCCESS(int key, char *message){
+int create_message_UPDATE_RESULT_SUCCESS(unsigned int key, char *message){
                    funcEntry(logF,NULL,"create_message_UPDATE_RESULT_SUCCESS");
             //       char *buffer = (char *)malloc(300);
                    sprintf(message,"UPDATE_RESULT_SUCCESS:%d;",key);
@@ -1244,7 +1244,7 @@ int create_message_UPDATE_RESULT_SUCCESS(int key, char *message){
                    funcExit(logF,NULL,"create_message_UPDATE_RESULT_SUCCESS",0);
                    return 0;
 }
-int create_message_LOOKUP(int key, char *message){
+int create_message_LOOKUP(unsigned int key, char *message){
                    funcEntry(logF,NULL,"create_message_LOOKUP");
 	      //     char *buffer = (char *)malloc(300);
 		   sprintf(message,"LOOKUP:%d;",key);
@@ -1252,7 +1252,7 @@ int create_message_LOOKUP(int key, char *message){
                    funcExit(logF,NULL,"create_message_LOOKUP",0);
 		   return 0;
 }
-int create_message_LOOKUP_RESULT(int key, char *value, char *message){
+int create_message_LOOKUP_RESULT(unsigned int key, char *value, char *message){
                    funcEntry(logF,NULL,"create_message_LOOKUP_RESULT");
 	           int len = strlen(value);
 	//	   char *buffer = (char *)malloc(len + 300);
@@ -1269,7 +1269,7 @@ int create_message_ERROR(char *message){
                    funcExit(logF, NULL,"create_message_ERROR",0);
                    return 0;
 }
-int create_message_INSERT_LEAVE(int key, char *value, char *message){
+int create_message_INSERT_LEAVE(unsigned int key, char *value, char *message){
                    funcEntry(logF,NULL,"create_message_INSERT_LEAVE");
            //        int len = strlen(value);
           //         char *buffer = (char *)malloc(len+300);
