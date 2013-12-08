@@ -2149,7 +2149,10 @@ void * FEfunction(void *clientFdPassed)
     close(clientFd);
     printToLog(logF, "SEE HERE", "peerSocket closing before the end of the loop");
     close(peerSocket);
-    free(ptr); 
+    if (ptr)
+        free(ptr); 
+    if ( temp != NULL )
+        free(temp);
     funcExit(logF, "THREAD FUNCTON EXIT", "FEfunction", 0);
 
 } // End of FEfunction()
