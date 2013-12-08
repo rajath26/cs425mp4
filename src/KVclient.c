@@ -264,7 +264,7 @@ int clientReceiveFunc()
 
     struct sockaddr_in serverAddress;
 
-    struct op_code *temp = NULL;
+    struct op_code *temp = (struct op_code *) malloc(sizeof(struct op_code));
 
     //listen(tcp, LISTEN_QUEUE_LENGTH);
 
@@ -273,7 +273,8 @@ int clientReceiveFunc()
         memset(recMsg, '\0', LONG_BUF_SZ);
         memset(&serverAddress, 0, sizeof(struct sockaddr_in));
         numOfBytesRec = 0;
-        temp = NULL;
+        memset(temp, 0, sizeof(struct op_code));
+        //temp = NULL;
 
         numOfBytesRec = recvTCP(tcp, recMsg, LONG_BUF_SZ);
         // Check if 0 bytes is received 
@@ -286,7 +287,7 @@ int clientReceiveFunc()
 
         printToLog(logF, "RECEIVED MESSAGE IS", recMsg);
 
-        i_rc = extract_message_op(recMsg, &temp);
+        i_rc = extract_message_op(recMsg, temp);
         if ( ERROR == i_rc )
         {
             printf("\nUnable to extract received message. Return code of extract_message_op = %d\n", i_rc);

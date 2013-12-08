@@ -1289,7 +1289,7 @@ struct op_code{
 };
 */
 // INSERT, DELETE, UPDATE, GET messages are possible
-int extract_message_op(char *message, struct op_code** instance){
+int extract_message_op(char *message, struct op_code* instance){
 
                    funcEntry(logF,NULL,"extract_message_op");
                    char original[4096];
@@ -1338,18 +1338,18 @@ int extract_message_op(char *message, struct op_code** instance){
              //      char port[30];                     // store to port
              //      strcpy(port,token3);
 
-                   *instance = (struct op_code *)malloc(sizeof(struct op_code));    
+                  // *instance = (struct op_code *)malloc(sizeof(struct op_code));    
                    
-                   if(*instance == NULL){
+                   if(instance == NULL){
                            printToLog(logF,"malloc failed in","extract_message");
                            return -1;  
                    }
                            
-                   memset(*instance,0,sizeof(struct op_code));                 
+           //        memset(*instance,0,sizeof(struct op_code));                 
              
 
-                   strcpy((*instance)->port,port);
-                   strcpy((*instance)->IP,IP); 
+                   strcpy(instance->port,port);
+                   strcpy(instance->IP,IP); 
 
 	 	 //  *instance = (struct op_code *)malloc(sizeof(struct op_code));  // up-to the caller to free this
 
@@ -1357,18 +1357,18 @@ int extract_message_op(char *message, struct op_code** instance){
 		   char *token=strtok(token_on,delim); 	
                     
 		   if (strcmp(token,"INSERT")==0){   //INSERT:KEY:VALUE;
-		            (*instance)->opcode = 1; // 1 is the op-code for insert
+		            instance->opcode = 1; // 1 is the op-code for insert
 					
 			    token=strtok(NULL,delim);  //GET KEY
-                    	    (*instance)->key = atoi(token);  
+                    	    instance->key = atoi(token);  
  
                             token=strtok(NULL,delim);    //GET VALUE
 			    int len = strlen(token);     
 			    char *value_instance = (char *)malloc(len);
 			    strcpy(value_instance,token);
-                    	    (*instance)->value = value_instance;
-                            (*instance)->timeStamp = timestampval;
-                            (*instance)->cons_level = conslevelval;
+                    	    instance->value = value_instance;
+                            instance->timeStamp = timestampval;
+                            instance->cons_level = conslevelval;
                    			    	
                         //    free(ip_port);
                        //     free(token_on);
@@ -1380,10 +1380,10 @@ int extract_message_op(char *message, struct op_code** instance){
                    }
              					
 		   if(strcmp(token,"DELETE")==0){  //DELETE:KEY;
-		            (*instance)->opcode = 2; // 2 is the op-code for delete
+		            instance->opcode = 2; // 2 is the op-code for delete
 			    token = strtok(NULL,delim);  // GET KEY
-			    (*instance)->key = atoi(token);
-			    (*instance)->value = NULL;
+			    instance->key = atoi(token);
+			    instance->value = NULL;
                             
                          //   free(token_on);
                          //   free(ip_port);
@@ -1394,15 +1394,15 @@ int extract_message_op(char *message, struct op_code** instance){
 			    return 1;
 	           }
 		   if(strcmp(token,"UPDATE")==0){ //UPDATE:KEY:VALUE;
-		            (*instance)->opcode = 3; // 3 is the op-code for update
+		            instance->opcode = 3; // 3 is the op-code for update
                      	    token = strtok(NULL,delim); // GET KEY
-                            (*instance)->key = atoi(token);
+                            instance->key = atoi(token);
             
                             token = strtok(NULL,delim);  // get the value to update
                             int len = strlen(token);
                             char *value_instance = (char *)malloc(len);					 
 			    strcpy(value_instance, token);
-			    (*instance)->value = value_instance;
+			    instance->value = value_instance;
                             
                       //      free(token_on);
                       //      free(ip_port);
@@ -1413,10 +1413,10 @@ int extract_message_op(char *message, struct op_code** instance){
 			    return 1;
 		   }
 		   if(strcmp(token,"LOOKUP")==0){  //LOOKUP:KEY;
-		            (*instance)->opcode = 4; // 4 is the opcode for lookup
+		            instance->opcode = 4; // 4 is the opcode for lookup
 			    token = strtok(NULL,delim); //get key
-			    (*instance)->key = atoi(token);
-                            (*instance)->value = NULL;
+			    instance->key = atoi(token);
+                            instance->value = NULL;
                             
 		      //      free(token_on);
                       //      free(ip_port);		
@@ -1427,15 +1427,15 @@ int extract_message_op(char *message, struct op_code** instance){
 			    return 1;
 		   }
 		   if(strcmp(token,"LOOKUP_RESULT")==0){
-			    (*instance)->opcode = 5; // 5 is the opcode for lookup result
+			    instance->opcode = 5; // 5 is the opcode for lookup result
 		            token = strtok(NULL,delim); //get key
-		            (*instance)->key = atoi(token);
+		            instance->key = atoi(token);
 					 
 			    token = strtok(NULL,delim); // get value
 			    int len = strlen(token);
 			    char *value_instance = (char *)malloc(len);
 			    strcpy(value_instance, token);
-			    (*instance)->value = value_instance;
+			    instance->value = value_instance;
                             
                     //        free(token_on);
                     //        free(ip_port);
@@ -1446,11 +1446,11 @@ int extract_message_op(char *message, struct op_code** instance){
                             return 1;
 		   }
                    if(strcmp(token,"ERROR")==0){
-                            (*instance)->opcode = 99; // 99 is the error message opcode
+                            instance->opcode = 99; // 99 is the error message opcode
                             token = strtok(NULL,delim); //get error message
                             char *value_instance = (char *)malloc(strlen(token));
                             strcpy(value_instance,token);
-                            (*instance)->value = value_instance;
+                            instance->value = value_instance;
                             
                      //       free(token_on);
                      //       free(ip_port);
@@ -1461,19 +1461,19 @@ int extract_message_op(char *message, struct op_code** instance){
                             return 1;
                    }
                    if(strcmp(token,"INSERT_LEAVE")==0){
-                            (*instance)->opcode = 9; // 1 is the op-code for insert
+                            instance->opcode = 9; // 1 is the op-code for insert
 
                             token=strtok(NULL,delim);  //GET KEY
-                            (*instance)->key = atoi(token);
+                            instance->key = atoi(token);
 
                             token=strtok(NULL,delim);    //GET VALUE
                             int len = strlen(token);
                             char *value_instance = (char *)malloc(len);
                             strcpy(value_instance,token);
 
-                            (*instance)->value = value_instance;
-                            (*instance)->timeStamp = timestampval;
-                            (*instance)->cons_level = conslevelval;
+                            instance->value = value_instance;
+                            instance->timeStamp = timestampval;
+                            instance->cons_level = conslevelval;
 
 			//    free(token_on);
                         //    free(ip_port);	
@@ -1486,9 +1486,9 @@ int extract_message_op(char *message, struct op_code** instance){
 
 
                   if(strcmp(token,"REP_INSERT")==0){
-                            (*instance)->opcode = 10; // opcode for INSERT_REP
+                            instance->opcode = 10; // opcode for INSERT_REP
                             token = strtok(NULL,delim); // get key
-                            (*instance)->key = atoi(token);
+                            instance->key = atoi(token);
                             
                             token = strtok(NULL,delim);  // get value
                             int len = strlen(token);
@@ -1496,18 +1496,18 @@ int extract_message_op(char *message, struct op_code** instance){
                             char *value_instance = (char *)malloc(len);
                             strcpy(value_instance,token);
  
- 		            (*instance)->value = value_instance;
-                            (*instance)->timeStamp = timestampval;
-                            (*instance)->cons_level = conslevelval;
+ 		            instance->value = value_instance;
+                            instance->timeStamp = timestampval;
+                            instance->cons_level = conslevelval;
              
                             token = strtok(NULL, delim);  // get owner                            
-                            (*instance)->owner = atoi(token);
+                            instance->owner = atoi(token);
                          
                             token = strtok(NULL, delim);  // get friend1
-		            (*instance)->friend1 = atoi(token);
+		            instance->friend1 = atoi(token);
 
                             token = strtok(NULL, delim);  // get friend2
-                            (*instance)->friend2 = atoi(token);
+                            instance->friend2 = atoi(token);
                             
                         //    free(token_on);
                         //    free(ip_port);
@@ -1519,21 +1519,21 @@ int extract_message_op(char *message, struct op_code** instance){
                   }
 
                   if(strcmp(token,"REP_DELETE")==0){
-                            (*instance)->opcode = 11; // opcode for delete_rep
+                            instance->opcode = 11; // opcode for delete_rep
                             token = strtok(NULL,delim);   // get key
-                            (*instance)->key = atoi(token);
+                            instance->key = atoi(token);
 
-                            (*instance)->timeStamp = timestampval;
-                            (*instance)->cons_level = conslevelval;
+                            instance->timeStamp = timestampval;
+                            instance->cons_level = conslevelval;
 
                             token = strtok(NULL, delim);  // get owner                            
-                            (*instance)->owner = atoi(token);
+                            instance->owner = atoi(token);
 
                             token = strtok(NULL, delim);  // get friend1
-                            (*instance)->friend1 = atoi(token);
+                            instance->friend1 = atoi(token);
 
                             token = strtok(NULL, delim);  // get friend2
-                            (*instance)->friend2 = atoi(token);
+                            instance->friend2 = atoi(token);
 
                        //     free(token_on);
                        //     free(ip_port);
@@ -1545,21 +1545,21 @@ int extract_message_op(char *message, struct op_code** instance){
                   }
  
                   if(strcmp(token,"REP_LOOKUP")==0){
-                            (*instance)->opcode = 13; // opcode for delete_rep
+                            instance->opcode = 13; // opcode for delete_rep
                             token = strtok(NULL,delim);   // get key
-                            (*instance)->key = atoi(token);
+                            instance->key = atoi(token);
 
-                            (*instance)->timeStamp = timestampval;
-                            (*instance)->cons_level = conslevelval;
+                            instance->timeStamp = timestampval;
+                            instance->cons_level = conslevelval;
 
                             token = strtok(NULL, delim);  // get owner                            
-                            (*instance)->owner = atoi(token);
+                            instance->owner = atoi(token);
 
                             token = strtok(NULL, delim);  // get friend1
-                            (*instance)->friend1 = atoi(token);
+                            instance->friend1 = atoi(token);
 
                             token = strtok(NULL, delim);  // get friend2
-                            (*instance)->friend2 = atoi(token);
+                            instance->friend2 = atoi(token);
 
                        //     free(token_on);
                        //     free(ip_port);
@@ -1572,9 +1572,9 @@ int extract_message_op(char *message, struct op_code** instance){
 
                   if(strcmp(token,"REP_UPDATE")==0){
 
-                            (*instance)->opcode = 12; // opcode for UPDATE_REP
+                            instance->opcode = 12; // opcode for UPDATE_REP
                             token = strtok(NULL,delim); // get key
-                            (*instance)->key = atoi(token);
+                            instance->key = atoi(token);
 
                             token = strtok(NULL,delim);  // get value
                             int len = strlen(token);
@@ -1582,18 +1582,18 @@ int extract_message_op(char *message, struct op_code** instance){
                             char *value_instance = (char *)malloc(len);
                             strcpy(value_instance,token);
 
-                            (*instance)->value = value_instance;
-                            (*instance)->timeStamp = timestampval;
-                            (*instance)->cons_level = conslevelval;
+                            instance->value = value_instance;
+                            instance->timeStamp = timestampval;
+                            instance->cons_level = conslevelval;
 
                             token = strtok(NULL, delim);  // get owner                            
-                            (*instance)->owner = atoi(token);
+                            instance->owner = atoi(token);
 
                             token = strtok(NULL, delim);  // get friend1
-                            (*instance)->friend1 = atoi(token);
+                            instance->friend1 = atoi(token);
 
                             token = strtok(NULL, delim);  // get friend2
-                            (*instance)->friend2 = atoi(token);
+                            instance->friend2 = atoi(token);
 
                        //     free(token_on);
                        //     free(ip_port);
@@ -1608,7 +1608,7 @@ int extract_message_op(char *message, struct op_code** instance){
                    if(strcmp(token,"INSERT_RESULT_SUCCESS")==0){
                             printToLog(logF,"In INSERT_RESULT_SUCCESS","HERE");
                             funcExit(logF,NULL,"extract_message_op",0);
-                            (*instance)->opcode = 6;
+                             instance->opcode = 6;
                         //    free(original); 
                         //    free(another_copy);  
                         //    free(token_on); 
@@ -1617,7 +1617,7 @@ int extract_message_op(char *message, struct op_code** instance){
                    }
                    if(strcmp(token,"DELETE_RESULT_SUCCESS")==0){
                             funcExit(logF,NULL,"extract_message_op",0);
-                            (*instance)->opcode = 7;
+                            instance->opcode = 7;
                         //    free(original); 
                         //    free(another_copy);  
                         //    free(token_on); 
@@ -1626,7 +1626,7 @@ int extract_message_op(char *message, struct op_code** instance){
                     }
                    if(strcmp(token,"UPDATE_RESULT_SUCCESS")==0){
                             funcExit(logF,NULL,"extract_message_op",0);
-                            (*instance)->opcode = 8;
+                            instance->opcode = 8;
                        //     free(original); 
                        //     free(another_copy);  
                        //     free(token_on); 

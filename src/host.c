@@ -1028,7 +1028,9 @@ void * FEfunction(void *clientFdPassed)
          retMsg[LONG_BUF_SZ],
          * lookupValue;
 
-    struct op_code *temp = NULL;          // KV OPCODE
+    struct op_code *temp = (struct op_code *) malloc(sizeof(struct op_code));          // KV OPCODE
+
+    memset(temp, 0, sizeof(struct op_code));
 
     struct value_group check;
     int iAmAlreadyOwnerOfThis = 0;
@@ -1081,7 +1083,7 @@ void * FEfunction(void *clientFdPassed)
 	 // Step iii
 	 ///////////
 	 // Extract received message
-	 i_rc = extract_message_op(recMsg, &temp);
+	 i_rc = extract_message_op(recMsg, temp);
 	 if ( ERROR == i_rc )
 	 {
 	     sprintf(logMsg, "Unable to extract received message. Return code of extract_message_op = %d", i_rc);
@@ -2305,7 +2307,9 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
 
     struct sockaddr_in replicaNode;            // Replica Address
 
-    struct op_code *temp = NULL;
+    struct op_code *temp = (struct op_code *) malloc(sizeof(struct op_code));
+
+    memset(temp, 0, sizeof(struct op_code));
 
     for ( counter = 0; counter < NUM_OF_FRIENDS; counter++)
     {
@@ -2550,7 +2554,7 @@ int replicateKV(struct op_code * op_instance, int * friendListPtr)
          printToLog(logF, "replicateKV", "Response received for replication message");
          printToLog(logF, "replicateKV", response);
 
-         i_rc = extract_message_op(response, &temp);
+         i_rc = extract_message_op(response, temp);
          if ( ERROR == i_rc )
          {
              sprintf(logMsg, "Unable to extract received message. Return code of extract_message_op = %d", i_rc);
