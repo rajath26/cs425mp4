@@ -78,7 +78,7 @@ struct sockaddr_in KVClientAddr;
 
 struct op_code{
              int opcode;
-             int key;
+             unsigned int key;
              char *value;
              char port[15];
              char IP[40];
@@ -104,7 +104,7 @@ int createAndSendOpMsg();
 
 int append_time_consistency_level(unsigned int timestamp, int consistency_level, char *message){
                    funcEntry(logF,NULL,"append_time_consistency_level");
-                   char buf[20];
+                   char buf[200];
 
                    if(timestamp==-1){
     			 struct timeval timer;
@@ -115,7 +115,7 @@ int append_time_consistency_level(unsigned int timestamp, int consistency_level,
                    sprintf(buf,"%d",timestamp);
                    strcat(message,buf);
                    strcat(message,":");
-                   char buf1[20];
+                   char buf1[200];
                    sprintf(buf1,"%d",consistency_level);
                    strcat(message,buf1);
                    strcat(message,";");
@@ -136,10 +136,9 @@ int append_port_ip_to_message(char *port,char *ip,char *message){
 
 //upto the caller to free the buffers in create_message_X cases
 
- 
 int create_message_REP_INSERT(struct op_code* op, char *message){
 
-                   int key = op->key; 
+                   unsigned int key = op->key; 
                    char *value = op->value; 
                    int origin = op->owner; 
                    int friend1 = op->friend1; 
@@ -153,7 +152,7 @@ int create_message_REP_INSERT(struct op_code* op, char *message){
 
 int create_message_REP_DELETE(struct op_code* op,char *message){
 
-                   int key = op->key;
+                   unsigned int key = op->key;
                    char *value = op->value;
                    int origin = op->owner; 
                    int friend1 = op->friend1;
@@ -167,7 +166,7 @@ int create_message_REP_DELETE(struct op_code* op,char *message){
 
 int create_message_REP_UPDATE(struct op_code* op, char *message){
 
-                   int key = op->key;
+                   unsigned int key = op->key;
                    char *value = op->value;
                    int origin = op->owner;
                    int friend1 = op->friend1;
@@ -181,7 +180,7 @@ int create_message_REP_UPDATE(struct op_code* op, char *message){
 
 int create_message_REP_LOOKUP(struct op_code* op, char *message){
 
-                   int key = op->key;
+                   unsigned int key = op->key;
                    char *value = op->value;
                    int origin = op->owner;
                    int friend1 = op->friend1;
@@ -194,7 +193,7 @@ int create_message_REP_LOOKUP(struct op_code* op, char *message){
 }
 
 
-int create_message_INSERT(int key, char *value, char *message){
+int create_message_INSERT(unsigned int key, char *value, char *message){
                    funcEntry(logF,NULL,"create_message_INSERT");
 	           int len = strlen(value);
 	       //    char *buffer = (char *)malloc(300);
@@ -203,7 +202,7 @@ int create_message_INSERT(int key, char *value, char *message){
                    funcExit(logF,NULL,"create_message_INSERT",0);
 		   return 0;
 }
-int create_message_INSERT_RESULT_SUCCESS(int key, char *message){
+int create_message_INSERT_RESULT_SUCCESS(unsigned int key, char *message){
                    
                    funcEntry(logF,NULL,"create_message_RESULT_SUCCESS");
                 //   char *buffer = (char *)malloc(300);
@@ -212,7 +211,7 @@ int create_message_INSERT_RESULT_SUCCESS(int key, char *message){
                    funcExit(logF,NULL,"create_message_RESULT_SUCCESS",0);
                    return 0;
 }
-int create_message_DELETE(int key, char *message){
+int create_message_DELETE(unsigned int key, char *message){
                    funcEntry(logF,NULL,"create_message_DELETE");
 	        //   char *buffer = (char *)malloc(300);
 	           sprintf(message,"DELETE:%d;",key);
@@ -220,7 +219,7 @@ int create_message_DELETE(int key, char *message){
                    funcExit(logF,NULL,"create_message_DELETE",0);
 		   return 0;
 }
-int create_message_DELETE_RESULT_SUCCESS(int key, char *message){
+int create_message_DELETE_RESULT_SUCCESS(unsigned int key, char *message){
                    funcEntry(logF,NULL,"create_message_DELETE_RESULT_SUCCESS");
               //     char *buffer = (char *)malloc(300);
                    sprintf(message,"DELETE_RESULT_SUCCESS:%d;",key);
@@ -228,7 +227,7 @@ int create_message_DELETE_RESULT_SUCCESS(int key, char *message){
                    funcExit(logF,NULL,"create_message_DELETE_RESULT_SUCCESS",0);
                    return 0;
 }
-int create_message_UPDATE(int key, char *value, char *message){
+int create_message_UPDATE(unsigned int key, char *value, char *message){
                    funcEntry(logF,NULL,"create_message_UPDATE");
 	      //     int len = strlen(value);
 	       //    char *buffer = (char *)malloc(len+20+100);
@@ -237,7 +236,7 @@ int create_message_UPDATE(int key, char *value, char *message){
                    funcExit(logF,NULL,"create_message_UPDATE",0);
 		   return 0;
 }
-int create_message_UPDATE_RESULT_SUCCESS(int key, char *message){
+int create_message_UPDATE_RESULT_SUCCESS(unsigned int key, char *message){
                    funcEntry(logF,NULL,"create_message_UPDATE_RESULT_SUCCESS");
             //       char *buffer = (char *)malloc(300);
                    sprintf(message,"UPDATE_RESULT_SUCCESS:%d;",key);
@@ -245,7 +244,7 @@ int create_message_UPDATE_RESULT_SUCCESS(int key, char *message){
                    funcExit(logF,NULL,"create_message_UPDATE_RESULT_SUCCESS",0);
                    return 0;
 }
-int create_message_LOOKUP(int key, char *message){
+int create_message_LOOKUP(unsigned int key, char *message){
                    funcEntry(logF,NULL,"create_message_LOOKUP");
 	      //     char *buffer = (char *)malloc(300);
 		   sprintf(message,"LOOKUP:%d;",key);
@@ -253,7 +252,7 @@ int create_message_LOOKUP(int key, char *message){
                    funcExit(logF,NULL,"create_message_LOOKUP",0);
 		   return 0;
 }
-int create_message_LOOKUP_RESULT(int key, char *value, char *message){
+int create_message_LOOKUP_RESULT(unsigned int key, char *value, char *message){
                    funcEntry(logF,NULL,"create_message_LOOKUP_RESULT");
 	           int len = strlen(value);
 	//	   char *buffer = (char *)malloc(len + 300);
@@ -270,7 +269,7 @@ int create_message_ERROR(char *message){
                    funcExit(logF, NULL,"create_message_ERROR",0);
                    return 0;
 }
-int create_message_INSERT_LEAVE(int key, char *value, char *message){
+int create_message_INSERT_LEAVE(unsigned int key, char *value, char *message){
                    funcEntry(logF,NULL,"create_message_INSERT_LEAVE");
            //        int len = strlen(value);
           //         char *buffer = (char *)malloc(len+300);
@@ -292,20 +291,27 @@ struct op_code{
 int extract_message_op(char *message, struct op_code** instance){
 
                    funcEntry(logF,NULL,"extract_message_op");
-                   char original[512];
+                   char original[4096];
 	        //   char *original = (char *)malloc(strlen(message));
-                   strcpy(original,message);
+                   printToLog(logF,"printing message in extract_message",message);
+                   if(strlen(message)==0){
+                           printToLog(logF,"null message received","in extract_message");
+                           return -1;
+                   }
 
+                   strcpy(original,message);
+                   printToLog(logF,"extract_message_op: original",original);
                    // first extract the first part and then the second (port and the ip)
 
                //    char *another_copy = (char *)malloc(strlen(message));
-                   char another_copy[512];
+                   char another_copy[4096];
                    strcpy(another_copy,message);
+                   printToLog(logF,"checking another copy, extract_message",another_copy);
 
                    char delim_temp[5]=";";
                    char *token1 = strtok(another_copy,delim_temp); // extract the first part
                //    char *token_on = (char *)malloc(strlen(token1));
-                   char token_on[512];
+                   char token_on[4096];
                    strcpy(token_on,token1);                   
 
                    char *token2 = strtok(NULL,delim_temp);  // extract the second part
@@ -322,17 +328,25 @@ int extract_message_op(char *message, struct op_code** instance){
                    int conslevelval = atoi(conslevel);
 
                    char *token3 = strtok(ip_port,":");   //extract port from 2nd part
-                   char port[30];
+                   char port[300];
 		   strcpy(port,token3);
 
                    char *token4 = strtok(NULL,":");     //extract IP from 2nd part
-                   char IP[30];                       // store to IP
+                   char IP[300];                       // store to IP
                    strcpy(IP,token4);
              //      char port[30];                     // store to port
              //      strcpy(port,token3);
 
                    *instance = (struct op_code *)malloc(sizeof(struct op_code));    
-                 
+                   
+                   if(*instance == NULL){
+                           printToLog(logF,"malloc failed in","extract_message");
+                           return -1;  
+                   }
+                           
+                   memset(*instance,0,sizeof(struct op_code));                 
+             
+
                    strcpy((*instance)->port,port);
                    strcpy((*instance)->IP,IP); 
 
@@ -593,7 +607,7 @@ int extract_message_op(char *message, struct op_code** instance){
                    if(strcmp(token,"INSERT_RESULT_SUCCESS")==0){
                             printToLog(logF,"In INSERT_RESULT_SUCCESS","HERE");
                             funcExit(logF,NULL,"extract_message_op",0);
-                            
+                            (*instance)->opcode = 6;
                         //    free(original); 
                         //    free(another_copy);  
                         //    free(token_on); 
@@ -602,14 +616,16 @@ int extract_message_op(char *message, struct op_code** instance){
                    }
                    if(strcmp(token,"DELETE_RESULT_SUCCESS")==0){
                             funcExit(logF,NULL,"extract_message_op",0);
+                            (*instance)->opcode = 7;
                         //    free(original); 
                         //    free(another_copy);  
                         //    free(token_on); 
-                        //      free(ip_port);  
+                         //      free(ip_port);  
                             return 7;
                     }
                    if(strcmp(token,"UPDATE_RESULT_SUCCESS")==0){
                             funcExit(logF,NULL,"extract_message_op",0);
+                            (*instance)->opcode = 8;
                        //     free(original); 
                        //     free(another_copy);  
                        //     free(token_on); 
@@ -618,7 +634,6 @@ int extract_message_op(char *message, struct op_code** instance){
                    }
     
 }
-			
 
 
 /*
